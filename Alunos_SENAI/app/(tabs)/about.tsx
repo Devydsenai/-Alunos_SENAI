@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, TextInput, Modal, ScrollView } from 'react-native';
-import { useState, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 
 // Interface para o cliente
