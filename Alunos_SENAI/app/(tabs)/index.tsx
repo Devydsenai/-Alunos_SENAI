@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert, FlatList } from 'react-native';
 import { Link, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 // Interface para o cliente
 interface Cliente {
@@ -13,17 +13,64 @@ interface Cliente {
 
 export default function HomeScreen() {
   const [pesquisa, setPesquisa] = useState('');
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [clientesFiltrados, setClientesFiltrados] = useState<Cliente[]>([]);
+  const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loadingClientes, setLoadingClientes] = useState(true);
   const [novoCliente, setNovoCliente] = useState({
     nome: '',
     email: '',
     telefone: '',
     ativo: true
   });
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   // URL da API
   const API_URL = 'http://localhost:3000';
+
+  // Função para buscar clientes
+  const buscarClientes = async () => {
+    try {
+      setLoadingClientes(true);
+      const response = await fetch(`${API_URL}/clientes`);
+      if (response.ok) {
+        const data = await response.json();
+        setClientes(data);
+        setClientesFiltrados(data);
+      } else {
+        Alert.alert('Erro', 'Não foi possível carregar os clientes');
+      }
+    } catch (error) {
+      Alert.alert('Erro', 'Verifique se a API está rodando');
+      console.error('Erro ao buscar clientes:', error);
+    } finally {
+      setLoadingClientes(false);
+    }
+  };
+
+  // Função para filtrar clientes
+  const filtrarClientes = (texto: string) => {
+    setPesquisa(texto);
+    if (texto.trim() === '') {
+      setClientesFiltrados([]);
+      setMostrarSugestoes(false);
+    } else {
+      const filtrados = clientes.filter(cliente =>
+        cliente.nome.toLowerCase().includes(texto.toLowerCase()) ||
+        cliente.email.toLowerCase().includes(texto.toLowerCase()) ||
+        cliente.telefone.includes(texto)
+      );
+      setClientesFiltrados(filtrados);
+      setMostrarSugestoes(filtrados.length > 0);
+    }
+  };
+
+  // Função para selecionar um cliente da sugestão
+  const selecionarCliente = (cliente: Cliente) => {
+    setPesquisa(cliente.nome);
+    setMostrarSugestoes(false);
+  };
 
   // Função para adicionar cliente
   const adicionarCliente = async () => {
@@ -46,14 +93,10 @@ export default function HomeScreen() {
         // Limpar campos imediatamente após sucesso
         setNovoCliente({ nome: '', email: '', telefone: '', ativo: true });
         
-        Alert.alert('Sucesso', 'Cliente criado com sucesso!', [
-          {
-            text: 'OK',
-            onPress: () => {
-              router.push('/(tabs)/about'); // Redirecionar para lista de clientes
-            }
-          }
-        ]);
+        // Recarregar lista de clientes
+        await buscarClientes();
+        
+        Alert.alert('Sucesso', 'Cliente criado com sucesso!');
       } else {
         const error = await response.json();
         console.error('Erro da API:', error);
@@ -73,6 +116,12 @@ export default function HomeScreen() {
     }
   };
 
+  // Carregar clientes quando a tela for montada
+  useEffect(() => {
+    buscarClientes();
+  }, []);
+
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
@@ -85,9 +134,45 @@ export default function HomeScreen() {
             style={styles.searchInput}
             placeholder="Pesquisar clientes..."
             value={pesquisa}
-            onChangeText={setPesquisa}
+            onChangeText={filtrarClientes}
+            onFocus={() => {
+              if (pesquisa.trim() !== '' && clientesFiltrados.length > 0) {
+                setMostrarSugestoes(true);
+              }
+            }}
+            onBlur={() => {
+              // Delay para permitir clique na sugestão
+              setTimeout(() => setMostrarSugestoes(false), 200);
+            }}
             placeholderTextColor="#999"
           />
+          
+          {/* Dropdown de Sugestões */}
+          {mostrarSugestoes && clientesFiltrados.length > 0 && (
+            <View style={styles.sugestoesContainer}>
+              {clientesFiltrados.slice(0, 5).map((cliente) => (
+                <TouchableOpacity
+                  key={cliente.codigo}
+                  style={styles.sugestaoItem}
+                  onPress={() => selecionarCliente(cliente)}
+                >
+                  <View style={styles.sugestaoInfo}>
+                    <Text style={[styles.sugestaoNome, !cliente.ativo && styles.textoInativo]}>
+                      {cliente.nome}
+                    </Text>
+                    <Text style={[styles.sugestaoEmail, !cliente.ativo && styles.textoInativo]}>
+                      {cliente.email}
+                    </Text>
+                  </View>
+                  <View style={[styles.sugestaoStatus, { backgroundColor: cliente.ativo ? '#4CAF50' : '#F44336' }]}>
+                    <Text style={styles.sugestaoStatusText}>
+                      {cliente.ativo ? 'Ativo' : 'Inativo'}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
         </View>
 
         {/* Formulário de Criação */}
@@ -142,10 +227,11 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
+
         {/* Link para ver clientes */}
         <View style={styles.linkContainer}>
           <Link href="/(tabs)/about" style={styles.linkButton}>
-            <Text style={styles.linkText}>Ver Lista de Clientes</Text>
+            <Text style={styles.linkText}>Ver Lista Completa de Clientes</Text>
           </Link>
         </View>
       </View>
@@ -176,6 +262,8 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     marginBottom: 20,
+    position: 'relative',
+    zIndex: 1000,
   },
   searchInput: {
     backgroundColor: '#fff',
@@ -193,6 +281,60 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  // Estilos para o dropdown de sugestões
+  sugestoesContainer: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    marginTop: 5,
+    maxHeight: 200,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    zIndex: 1001,
+  },
+  sugestaoItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  sugestaoInfo: {
+    flex: 1,
+    marginRight: 10,
+  },
+  sugestaoNome: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 2,
+  },
+  sugestaoEmail: {
+    fontSize: 12,
+    color: '#666',
+  },
+  sugestaoStatus: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  sugestaoStatusText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
   formContainer: {
     backgroundColor: '#fff',
@@ -289,5 +431,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  textoInativo: {
+    color: '#999',
   },
 });
