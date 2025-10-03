@@ -139,53 +139,41 @@ export default function AboutScreen() {
     }
   };
 
-  // Função para excluir cliente
-  const excluirCliente = async (codigo: number) => {
+  // Função para excluir cliente (usando a função que funciona)
+  const excluirCliente = async (codigo: number, nome: string) => {
     console.log('=== BOTÃO DELETAR CLICADO ===');
-    console.log('Código do cliente:', codigo);
-    console.log('API URL:', `${API_URL}/clientes/${codigo}`);
+    console.log('API URL:', API_URL);
+    console.log('Cliente selecionado:', { codigo, nome });
     
-    Alert.alert(
-      'Confirmar Exclusão',
-      `Tem certeza que deseja excluir o cliente ${codigo}?`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Excluir',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              console.log(`Executando exclusão do cliente ${codigo}`);
-              console.log('Fazendo requisição DELETE para:', `${API_URL}/clientes/${codigo}`);
-              
-              const response = await fetch(`${API_URL}/clientes/${codigo}`, {
-                method: 'DELETE',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-              });
-              
-              console.log('Resposta da API:', response.status);
-              console.log('Response OK:', response.ok);
-
-              if (response.ok) {
-                const result = await response.json();
-                console.log('Resultado da exclusão:', result);
-                Alert.alert('Sucesso', 'Cliente excluído com sucesso!');
-                buscarClientes(); // Recarregar lista
-              } else {
-                const errorData = await response.json();
-                console.error('Erro da API:', errorData);
-                Alert.alert('Erro', `Não foi possível excluir: ${errorData.error || 'Erro desconhecido'}`);
-              }
-            } catch (error) {
-              console.error('Erro ao excluir cliente:', error);
-              Alert.alert('Erro', `Erro de conexão: ${error instanceof Error ? error.message : 'Erro desconhecido'}\n\nVerifique se a API está rodando.`);
-            }
-          },
+    try {
+      console.log('1. Testando DELETE para cliente:', codigo);
+      console.log('URL de delete:', `${API_URL}/clientes/${codigo}`);
+      
+      const deleteResponse = await fetch(`${API_URL}/clientes/${codigo}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      ]
-    );
+      });
+      
+      console.log('2. Resposta do DELETE:');
+      console.log('Status:', deleteResponse.status);
+      console.log('OK:', deleteResponse.ok);
+      
+      const deleteResult = await deleteResponse.json();
+      console.log('3. Resultado do DELETE:', deleteResult);
+      
+      if (deleteResponse.ok) {
+        Alert.alert('Sucesso!', `Cliente ${nome} (código: ${codigo}) foi deletado com sucesso!`);
+        buscarClientes(); // Recarregar lista
+      } else {
+        Alert.alert('Erro no DELETE', `Status: ${deleteResponse.status}\nErro: ${deleteResult.error || 'Erro desconhecido'}`);
+      }
+      
+    } catch (error) {
+      console.error('Erro no teste de delete:', error);
+      Alert.alert('Erro de Conexão', `Erro: ${error instanceof Error ? error.message : 'Erro desconhecido'}\n\nVerifique se a API está rodando.`);
+    }
   };
 
   // Função para editar cliente
@@ -220,6 +208,8 @@ export default function AboutScreen() {
       Alert.alert('Erro', `Erro ao buscar cliente: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
     }
   };
+
+
 
   // Carregar clientes quando a tela for montada
   useEffect(() => {
@@ -265,8 +255,8 @@ export default function AboutScreen() {
         </TouchableOpacity>
         
         <TouchableOpacity 
-          style={styles.botaoExcluir}
-          onPress={() => excluirCliente(item.codigo)}
+          style={styles.botaoTeste}
+          onPress={() => excluirCliente(item.codigo, item.nome)}
         >
           <Text style={styles.botaoTexto}>🗑️ Deletar</Text>
         </TouchableOpacity>
@@ -574,7 +564,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  botaoExcluir: {
+  botaoTeste: {
     backgroundColor: '#F44336',
     paddingHorizontal: 6,
     paddingVertical: 3,

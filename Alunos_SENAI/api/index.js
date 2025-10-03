@@ -146,13 +146,28 @@ async function start() {
 
     // Deletar cliente
     app.delete('/clientes/:codigo', async (req, res) => {
+      console.log('🔥🔥🔥 ROTA DELETE CHAMADA 🔥🔥🔥');
+      console.log('📋 Código recebido:', req.params.codigo);
+      console.log('⏰ Timestamp:', new Date().toISOString());
+      
       try {
+        console.log('🔍 Buscando cliente no banco...');
         const cliente = await Cliente.findByPk(req.params.codigo);
-        if (!cliente) return res.status(404).json({ error: 'Cliente não encontrado' });
+        
+        if (!cliente) {
+          console.log('❌ Cliente não encontrado');
+          return res.status(404).json({ error: 'Cliente não encontrado' });
+        }
+        
+        console.log('✅ Cliente encontrado:', cliente.dataValues);
+        console.log('🗑️ Iniciando exclusão...');
+        
         await cliente.destroy();
+        
+        console.log('🎉 Cliente excluído com sucesso!');
         res.json({ message: 'Cliente removido' });
       } catch (err) {
-        console.error(err);
+        console.error('💥 ERRO na exclusão:', err);
         res.status(500).json({ error: 'Erro ao remover cliente' });
       }
     });
