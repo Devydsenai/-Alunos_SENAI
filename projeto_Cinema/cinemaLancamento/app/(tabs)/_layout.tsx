@@ -2,8 +2,19 @@ import { Tabs } from 'expo-router';
 
 export default function TabLayout() {
   return (
-    <Tabs screenOptions={{ headerShown: false }}>
-      <Tabs.Screen name="loading" options={{ href: null }} />
+    <Tabs 
+      screenOptions={{ 
+        headerShown: false,
+      }}
+      initialRouteName="loading"
+    >
+      <Tabs.Screen 
+        name="loading" 
+        options={{ 
+          href: null,
+          tabBarStyle: { display: 'none' }
+        }} 
+      />
       <Tabs.Screen 
         name="index" 
         options={{ 
@@ -22,7 +33,8 @@ export default function TabLayout() {
         name="seats" 
         options={{ 
           title: 'Poltronas',
-          href: null, // Esconde das tabs, acessível apenas via navegação
+          href: null,
+          tabBarStyle: { display: 'none' }
         }} 
       />
     </Tabs>

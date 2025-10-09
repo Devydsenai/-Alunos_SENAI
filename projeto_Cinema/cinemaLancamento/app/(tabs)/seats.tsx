@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Alert,
     ScrollView,
@@ -24,8 +24,14 @@ export default function SeatsScreen() {
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   
   // Dados do filme vindos da navegação
+  const filmeId = params.filmeId || '0';
   const filmeTitulo = params.filmeTitulo || 'Filme';
   const vagasDisponiveis = Number(params.vagasDisponiveis) || 60;
+  
+  // Reset seleções sempre que o filmeId mudar
+  useEffect(() => {
+    setSelectedSeats([]);
+  }, [filmeId]);
   
   // Criar layout de poltronas (10 fileiras x 12 poltronas)
   const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
@@ -35,9 +41,8 @@ export default function SeatsScreen() {
   // Calcular poltronas ocupadas baseado nas vagas disponíveis
   const occupiedCount = totalSeats - vagasDisponiveis;
   
-  // Gerar poltronas ocupadas aleatoriamente
+  // Gerar poltronas ocupadas específicas para este filme (baseado no ID)
   const generateOccupiedSeats = () => {
-    const occupied: string[] = [];
     const allSeats: string[] = [];
     
     // Criar lista de todas as poltronas
@@ -47,8 +52,21 @@ export default function SeatsScreen() {
       }
     });
     
-    // Selecionar poltronas aleatórias como ocupadas
-    const shuffled = [...allSeats].sort(() => Math.random() - 0.5);
+    // Usar o ID do filme como seed para gerar poltronas ocupadas consistentes
+    // Assim cada filme terá sempre as mesmas poltronas ocupadas
+    const seed = Number(filmeId) || 1;
+    const seededRandom = (index: number) => {
+      const x = Math.sin(seed * index) * 10000;
+      return x - Math.floor(x);
+    };
+    
+    // Ordenar baseado no seed
+    const shuffled = [...allSeats].sort((a, b) => {
+      const indexA = allSeats.indexOf(a);
+      const indexB = allSeats.indexOf(b);
+      return seededRandom(indexA) - seededRandom(indexB);
+    });
+    
     return shuffled.slice(0, occupiedCount);
   };
   
@@ -138,8 +156,15 @@ export default function SeatsScreen() {
     <ScrollView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backButtonText}>← Voltar</Text>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => {
+            // Limpar seleções antes de voltar
+            setSelectedSeats([]);
+            router.push('/(tabs)' as any);
+          }}
+        >
+          <Text style={styles.backButtonText}>← Voltar para Pesquisa</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>🪑 Seleção de Poltronas</Text>
         <Text style={styles.headerSubtitle}>{filmeTitulo}</Text>
