@@ -11,6 +11,7 @@ import {
   View
 } from "react-native";
 import { api, Filme } from '../services/api';
+import { ColorProperties } from 'react-native-reanimated/lib/typescript/Colors';
 
 // Interface estendida para adicionar disponibilidade
 interface FilmeComSessao extends Filme {
@@ -86,7 +87,7 @@ export default function Index() {
             defaultSource={require('../../assets/images/icon.png')}
           />
           <View style={styles.filmeInfo}>
-            <Text style={styles.filmeTitle}>{item.Title}</Text>
+            <Text style={styles.filmeTitle} numberOfLines={2}>{item.Title}</Text>
             <Text style={styles.filmeYear}>{item.Year} • {item.Runtime}</Text>
             <Text style={styles.filmeGenre}>{item.Genre}</Text>
             <View style={styles.filmeFooter}>
@@ -97,51 +98,36 @@ export default function Index() {
                 </View>
               )}
             </View>
+            
+            {/* Botão Escolher Poltronas no lugar da avaliação */}
+            {!item.ComingSoon && (
+              <TouchableOpacity 
+                style={[
+                  styles.seatsButtonCompact,
+                  !item.sessaoDisponivel && styles.seatsButtonDisabled
+                ]}
+                onPress={() => {
+                  if (item.sessaoDisponivel) {
+                    router.push({
+                      pathname: '/(tabs)/seats',
+                      params: { 
+                        filmeId: item.codigo,
+                        filmeTitulo: item.Title,
+                        vagasDisponiveis: item.vagasDisponiveis
+                      }
+                    } as any);
+                  }
+                }}
+                disabled={!item.sessaoDisponivel}
+              >
+                <Text style={styles.seatsButtonText}>
+                  {item.sessaoDisponivel ? '🎟️ Escolher Poltronas' : '🚫 Indisponível'}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
-        {/* Container de Poltronas */}
-        {!item.ComingSoon && (
-          <View style={styles.seatsContainer}>
-            <View style={styles.seatsInfo}>
-              <Text style={styles.seatsTitle}>🪑 Sessão</Text>
-              <View style={[
-                styles.statusBadge, 
-                item.sessaoDisponivel ? styles.statusAvailable : styles.statusFull
-              ]}>
-                <Text style={styles.statusText}>
-                  {item.sessaoDisponivel 
-                    ? `✓ ${item.vagasDisponiveis} vagas disponíveis` 
-                    : '✕ Sessão Lotada'}
-                </Text>
-              </View>
-            </View>
-            
-            <TouchableOpacity 
-              style={[
-                styles.seatsButton,
-                !item.sessaoDisponivel && styles.seatsButtonDisabled
-              ]}
-              onPress={() => {
-                if (item.sessaoDisponivel) {
-                  router.push({
-                    pathname: '/(tabs)/seats',
-                    params: { 
-                      filmeId: item.codigo,
-                      filmeTitulo: item.Title,
-                      vagasDisponiveis: item.vagasDisponiveis
-                    }
-                  } as any);
-                }
-              }}
-              disabled={!item.sessaoDisponivel}
-            >
-              <Text style={styles.seatsButtonText}>
-                {item.sessaoDisponivel ? '🎟️ Escolher Poltronas' : '🚫 Indisponível'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
       </View>
     );
   };
@@ -280,66 +266,78 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   listContainer: {
-    padding: 20,
+    padding: 12,
+  },
+  resultsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 8,
   },
   filmeContainer: {
-    marginBottom: 20,
     backgroundColor: "#2a2a2a",
-    borderRadius: 12,
+    marginBottom: 10,
+    borderRadius: 8,
     overflow: "hidden",
+    elevation: 3,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
+    shadowRadius: 3,
+    width: '45%', // Largura ideal para o tamanho da imagem
   },
   filmeItem: {
-    flexDirection: "row",
+    flexDirection: "column", // Mudança para layout vertical
+    backgroundColor: "#1a1a1a",
   },
   filmePoster: {
-    width: 100,
-    height: 150,
+    width: '25%', // Largura total do container
+    height: 150, // Altura maior para dar destaque ao poster como na imagem
     resizeMode: "cover",
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
   },
   filmeInfo: {
-    flex: 1,
-    padding: 12,
+    padding: 8,
     justifyContent: "space-between",
+    minHeight: 70,
   },
   filmeTitle: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: "bold",
     color: "#fff",
-    marginBottom: 4,
+    marginBottom: 2,
+    lineHeight: 16,
   },
   filmeYear: {
-    fontSize: 14,
+    fontSize: 11,
     color: "#999",
-    marginBottom: 4,
+    marginBottom: 2,
   },
   filmeGenre: {
-    fontSize: 12,
+    fontSize: 10,
     color: "#E50914",
-    marginBottom: 8,
+    marginBottom: 4,
   },
   filmeFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginTop: 4,
   },
   filmeRating: {
-    fontSize: 14,
+    fontSize: 11,
     color: "#ffd700",
     fontWeight: "bold",
   },
   badge: {
     backgroundColor: "#E50914",
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    borderRadius: 2,
   },
   badgeText: {
-    fontSize: 10,
+    fontSize: 6,
     color: "#fff",
     fontWeight: "bold",
   },
@@ -395,22 +393,32 @@ const styles = StyleSheet.create({
     borderColor: "#E50914",
   },
   statusText: {
-    fontSize: 12,
+    fontSize: 8,
     fontWeight: "bold",
     color: "#fff",
   },
+  seatsButtonCompact: {
+    height: 50,
+    width: 180,
+    backgroundColor: "#E50914",
+    padding: 8,
+    borderRadius: 6,
+    alignItems: "center",
+    marginTop: 6,
+  },
   seatsButton: {
     backgroundColor: "#E50914",
-    padding: 12,
-    borderRadius: 8,
+    padding: 4,
+    borderRadius: 4,
     alignItems: "center",
+    marginTop: 2,
   },
   seatsButtonDisabled: {
     backgroundColor: "#555",
   },
   seatsButtonText: {
     color: "#fff",
-    fontSize: 14,
+    fontSize: 10,
     fontWeight: "bold",
   },
 });
