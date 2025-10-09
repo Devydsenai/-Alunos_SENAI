@@ -1,13 +1,12 @@
 /**
  * @file index.js
- * @description Gerenciador de times de futebol com funcionalidades para adicionar, listar e buscar times.
+ * @description Gerenciador de times de futebol com funcionalidades extras: ordenação, filtro e exportação.
  * @author Devyd
  */
 
-// Criamos uma classe para representar um time de futebol
 /**
  * @class
- * @classdesc Representa um time de futebol com nome, cidade e número de títulos.
+ * @classdesc Representa um time de futebol.
  */
 class Time {
   /**
@@ -23,18 +22,29 @@ class Time {
   }
 
   /**
-   * @description Retorna uma descrição completa do time.
-   * @returns {string} Descrição do time.
+   * @description Retorna uma descrição do time.
+   * @returns {string} Descrição formatada.
    */
   getDescricao() {
-    return `${this.nome} é um time da cidade de ${this.cidade} com ${this.titulos} títulos.`;
+    return `${this.nome} (${this.cidade}) - ${this.titulos} títulos`;
+  }
+
+  /**
+   * @description Exporta os dados do time como objeto JSON.
+   * @returns {Object} Objeto com os dados do time.
+   */
+  toJSON() {
+    return {
+      nome: this.nome,
+      cidade: this.cidade,
+      titulos: this.titulos
+    };
   }
 }
 
-// Criamos uma classe para gerenciar os times cadastrados
 /**
  * @class
- * @classdesc Gerencia uma lista de times de futebol.
+ * @classdesc Gerencia uma coleção de times de futebol.
  */
 class GerenciadorDeTimes {
   constructor() {
@@ -42,11 +52,10 @@ class GerenciadorDeTimes {
   }
 
   /**
-   * @description Adiciona um novo time à lista.
+   * @description Adiciona um novo time, evitando duplicatas.
    * @param {Time} time - Instância da classe Time.
    */
   adicionarTime(time) {
-    // Verificamos se o time já existe pelo nome
     const existe = this.times.some(t => t.nome === time.nome);
     if (!existe) {
       this.times.push(time);
@@ -65,34 +74,59 @@ class GerenciadorDeTimes {
 
   /**
    * @description Busca um time pelo nome.
-   * @param {string} nome - Nome do time a ser buscado.
-   * @returns {Time|null} Retorna o time encontrado ou null se não existir.
+   * @param {string} nome - Nome do time.
+   * @returns {Time|null} Time encontrado ou null.
    */
   buscarTime(nome) {
-    const timeEncontrado = this.times.find(t => t.nome.toLowerCase() === nome.toLowerCase());
-    return timeEncontrado || null;
+    return this.times.find(t => t.nome.toLowerCase() === nome.toLowerCase()) || null;
+  }
+
+  /**
+   * @description Filtra os times por cidade.
+   * @param {string} cidade - Nome da cidade.
+   * @returns {Time[]} Lista de times da cidade.
+   */
+  filtrarPorCidade(cidade) {
+    return this.times.filter(t => t.cidade.toLowerCase() === cidade.toLowerCase());
+  }
+
+  /**
+   * @description Ordena os times por número de títulos (descendente).
+   * @returns {Time[]} Lista ordenada.
+   */
+  ordenarPorTitulos() {
+    return [...this.times].sort((a, b) => b.titulos - a.titulos);
+  }
+
+  /**
+   * @description Exporta todos os times como JSON.
+   * @returns {string} String JSON com os dados dos times.
+   */
+  exportarJSON() {
+    return JSON.stringify(this.times.map(t => t.toJSON()), null, 2);
   }
 }
 
 // Exemplo de uso
 const gerenciador = new GerenciadorDeTimes();
 
-const flamengo = new Time("Flamengo", "Rio de Janeiro", 7);
-const palmeiras = new Time("Palmeiras", "São Paulo", 11);
+gerenciador.adicionarTime(new Time("Flamengo", "Rio de Janeiro", 7));
+gerenciador.adicionarTime(new Time("Palmeiras", "São Paulo", 11));
+gerenciador.adicionarTime(new Time("Sport", "Recife", 3));
+gerenciador.adicionarTime(new Time("Santa Cruz", "Recife", 1));
 
-gerenciador.adicionarTime(flamengo);
-gerenciador.adicionarTime(palmeiras);
+// Listagem
+console.log("Todos os times:");
+gerenciador.listarTimes().forEach(t => console.log(t.getDescricao()));
 
-// Teste de listagem
-console.log("Times cadastrados:");
-gerenciador.listarTimes().forEach(time => {
-  console.log(time.getDescricao());
-});
+// Ordenação
+console.log("\nTimes ordenados por títulos:");
+gerenciador.ordenarPorTitulos().forEach(t => console.log(t.getDescricao()));
 
-// Teste de busca
-const buscado = gerenciador.buscarTime("Palmeiras");
-if (buscado) {
-  console.log("Time encontrado:", buscado.getDescricao());
-} else {
-  console.log("Time não encontrado.");
-}
+// Filtro
+console.log("\nTimes de Recife:");
+gerenciador.filtrarPorCidade("Recife").forEach(t => console.log(t.getDescricao()));
+
+// Exportação
+console.log("\nExportação JSON:");
+console.log(gerenciador.exportarJSON());
