@@ -22,9 +22,9 @@ export default function LoadScreen() {
       }),
     ]).start();
 
-    // Redireciona para a tela Home após 3 segundos
+    // Redireciona para a tela de pesquisa após 3 segundos
     const timer = setTimeout(() => {
-      router.replace('/');
+      router.replace('/(tabs)');
     }, 3000);
 
     // Limpa o timer quando o componente for desmontado

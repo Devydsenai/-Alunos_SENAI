@@ -1,247 +1,214 @@
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from "react";
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from "react-native";
+import { api, Filme } from '../services/api';
 
-// Interface para os filmes
-interface Filme {
-  codigo: number;
-  Title: string;
-  Year: string;
-  Rated: string;
-  Runtime: string;
-  Genre: string;
-  Director: string;
-  Plot: string;
-  Poster: string;
-  imdbRating: string;
-  ComingSoon: boolean;
+// Interface estendida para adicionar disponibilidade
+interface FilmeComSessao extends Filme {
+  sessaoDisponivel: boolean;
+  vagasDisponiveis: number;
 }
 
-// Dados dos filmes (do seed.js) com imagens funcionais
-const filmes: Filme[] = [
-  {
-    codigo: 1,
-    Title: "Avatar",
-    Year: "2009",
-    Rated: "PG-13",
-    Runtime: "162 min",
-    Genre: "Action, Adventure, Fantasy",
-    Director: "James Cameron",
-    Plot: "A paraplegic marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.",
-    Poster: "https://m.media-amazon.com/images/M/MV5BMTYwOTEwNjAzMl5BMl5BanBnXkFtZTcwODc5MTUwMw@@._V1_SX300.jpg",
-    imdbRating: "7.9",
-    ComingSoon: false,
-  },
-  {
-    codigo: 2,
-    Title: "The Avengers",
-    Year: "2012",
-    Rated: "PG-13",
-    Runtime: "143 min",
-    Genre: "Action, Sci-Fi, Thriller",
-    Director: "Joss Whedon",
-    Plot: "Earth's mightiest heroes must come together and learn to fight as a team if they are to stop the mischievous Loki and his alien army from enslaving humanity.",
-    Poster: "https://m.media-amazon.com/images/M/MV5BNDYxNjQyMjAtNTdiOS00NGYwLWFmNTAtNThmYjU5ZGI2YTI1XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX300.jpg",
-    imdbRating: "8.1",
-    ComingSoon: false,
-  },
-  {
-    codigo: 3,
-    Title: "Interstellar",
-    Year: "2014",
-    Rated: "PG-13",
-    Runtime: "169 min",
-    Genre: "Adventure, Drama, Sci-Fi",
-    Director: "Christopher Nolan",
-    Plot: "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
-    Poster: "https://m.media-amazon.com/images/M/MV5BZjdkOTU3MDktN2IxOS00OGEyLWFmMjktY2FiMmZkNWIyODZiXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX300.jpg",
-    imdbRating: "8.6",
-    ComingSoon: false,
-  },
-  {
-    codigo: 4,
-    Title: "I Am Legend",
-    Year: "2007",
-    Rated: "PG-13",
-    Runtime: "101 min",
-    Genre: "Drama, Horror, Sci-Fi",
-    Director: "Francis Lawrence",
-    Plot: "Years after a plague kills most of humanity and transforms the rest into monsters, the sole survivor in New York City struggles valiantly to find a cure.",
-    Poster: "https://m.media-amazon.com/images/M/MV5BMTU4NzMyNDk1OV5BMl5BanBnXkFtZTcwOTEwMzU1MQ@@._V1_SX300.jpg",
-    imdbRating: "7.2",
-    ComingSoon: false,
-  },
-  {
-    codigo: 5,
-    Title: "300",
-    Year: "2006",
-    Rated: "R",
-    Runtime: "117 min",
-    Genre: "Action, Drama, Fantasy",
-    Director: "Zack Snyder",
-    Plot: "King Leonidas of Sparta and a force of 300 men fight the Persians at Thermopylae in 480 B.C.",
-    Poster: "https://m.media-amazon.com/images/M/MV5BMjAzNTkzNjcxNl5BMl5BanBnXkFtZTYwNDA4NjE3._V1_SX300.jpg",
-    imdbRating: "7.7",
-    ComingSoon: false,
-  },
-  {
-    codigo: 6,
-    Title: "The Wolf of Wall Street",
-    Year: "2013",
-    Rated: "R",
-    Runtime: "180 min",
-    Genre: "Biography, Comedy, Crime",
-    Director: "Martin Scorsese",
-    Plot: "Based on the true story of Jordan Belfort, from his rise to a wealthy stock-broker living the high life to his fall involving crime, corruption and the federal government.",
-    Poster: "https://m.media-amazon.com/images/M/MV5BMjIxMjgxNTk0MF5BMl5BanBnXkFtZTgwNjIyOTg2MDE@._V1_SX300.jpg",
-    imdbRating: "8.2",
-    ComingSoon: false,
-  },
-  {
-    codigo: 7,
-    Title: "Breaking Bad",
-    Year: "2008–2013",
-    Rated: "TV-14",
-    Runtime: "49 min",
-    Genre: "Crime, Drama, Thriller",
-    Director: "N/A",
-    Plot: "A high school chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine in order to secure his family's financial future.",
-    Poster: "https://m.media-amazon.com/images/M/MV5BMTQ0ODYzODc0OV5BMl5BanBnXkFtZTgwMDk3OTcyMDE@._V1_SX300.jpg",
-    imdbRating: "9.5",
-    ComingSoon: false,
-  },
-  {
-    codigo: 8,
-    Title: "Game of Thrones",
-    Year: "2011–",
-    Rated: "TV-MA",
-    Runtime: "56 min",
-    Genre: "Adventure, Drama, Fantasy",
-    Director: "N/A",
-    Plot: "While a civil war brews between several noble families in Westeros, the children of the former rulers of the land attempt to rise up to power.",
-    Poster: "https://m.media-amazon.com/images/M/MV5BMjM5OTQ1MTY5Nl5BMl5BanBnXkFtZTgwMjM3NzMxODE@._V1_SX300.jpg",
-    imdbRating: "9.5",
-    ComingSoon: false,
-  },
-  {
-    codigo: 9,
-    Title: "Vikings",
-    Year: "2013–",
-    Rated: "TV-14",
-    Runtime: "44 min",
-    Genre: "Action, Drama, History",
-    Director: "N/A",
-    Plot: "The world of the Vikings is brought to life through the journey of Ragnar Lothbrok, the first Viking to emerge from Norse legend and onto the pages of history.",
-    Poster: "https://m.media-amazon.com/images/M/MV5BOTEzNzI3MDc0N15BMl5BanBnXkFtZTgwMzk1MzA5NzE@._V1_SX300.jpg",
-    imdbRating: "8.6",
-    ComingSoon: false,
-  },
-  {
-    codigo: 10,
-    Title: "Doctor Strange",
-    Year: "2016",
-    Rated: "N/A",
-    Runtime: "N/A",
-    Genre: "Action, Adventure, Fantasy",
-    Director: "Scott Derrickson",
-    Plot: "After his career is destroyed, a brilliant but arrogant and conceited surgeon gets a new lease on life when a sorcerer takes him under her wing.",
-    Poster: "https://m.media-amazon.com/images/M/MV5BNjgwNzAzNjk1Nl5BMl5BanBnXkFtZTgwMzQ2NjI1OTE@._V1_SX300.jpg",
-    imdbRating: "N/A",
-    ComingSoon: true,
-  },
-  {
-    codigo: 11,
-    Title: "Rogue One: A Star Wars Story",
-    Year: "2016",
-    Rated: "N/A",
-    Runtime: "N/A",
-    Genre: "Action, Adventure, Sci-Fi",
-    Director: "Gareth Edwards",
-    Plot: "The Rebellion makes a risky move to steal the plans to the Death Star, setting up the epic saga to follow.",
-    Poster: "https://m.media-amazon.com/images/M/MV5BMjQyMzI2OTA3OF5BMl5BanBnXkFtZTgwNDg5NjQ0OTE@._V1_SX300.jpg",
-    imdbRating: "N/A",
-    ComingSoon: true,
-  },
-  {
-    codigo: 12,
-    Title: "Assassin's Creed",
-    Year: "2016",
-    Rated: "N/A",
-    Runtime: "N/A",
-    Genre: "Action, Adventure, Fantasy",
-    Director: "Justin Kurzel",
-    Plot: "When Callum Lynch explores the memories of his ancestor Aguilar and gains the skills of a Master Assassin, he discovers he is a descendant of the secret Assassins society.",
-    Poster: "https://m.media-amazon.com/images/M/MV5BMTU2MTQwMjU1OF5BMl5BanBnXkFtZTgwMDA5NjU5ODE@._V1_SX300.jpg",
-    imdbRating: "N/A",
-    ComingSoon: true,
-  },
-];
-
 export default function Index() {
-  const [filmesEmCartaz, setFilmesEmCartaz] = useState<Filme[]>([]);
-  const [lancamentos, setLancamentos] = useState<Filme[]>([]);
+  const [todosFilmes, setTodosFilmes] = useState<FilmeComSessao[]>([]);
+  const [filmesFiltrados, setFilmesFiltrados] = useState<FilmeComSessao[]>([]);
+  const [searchText, setSearchText] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    // Separar filmes em cartaz e lançamentos
-    const emCartaz = filmes.filter(filme => !filme.ComingSoon);
-    const novosLancamentos = filmes.filter(filme => filme.ComingSoon);
-    
-    setFilmesEmCartaz(emCartaz);
-    setLancamentos(novosLancamentos);
+    carregarFilmes();
   }, []);
 
-  const renderFilmeCard = (filme: Filme) => (
-    <TouchableOpacity key={filme.codigo} style={styles.card}>
-      <Image 
-        source={{ uri: filme.Poster }} 
-        style={styles.poster}
-        defaultSource={require('../../assets/images/icon.png')} // Imagem padrão caso não carregue
-        onError={() => console.log('Erro ao carregar imagem:', filme.Title)}
-      />
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{filme.Title}</Text>
-        <Text style={styles.cardYear}>{filme.Year}</Text>
-        <Text style={styles.cardGenre}>{filme.Genre}</Text>
-        <View style={styles.ratingContainer}>
-          <Text style={styles.rating}>⭐ {filme.imdbRating}</Text>
-          {filme.ComingSoon && (
-            <View style={styles.comingSoonBadge}>
-              <Text style={styles.comingSoonText}>EM BREVE</Text>
+  useEffect(() => {
+    // Filtrar filmes quando o texto de busca mudar
+    if (searchText.trim() === '') {
+      setFilmesFiltrados(todosFilmes);
+    } else {
+      const filtrados = todosFilmes.filter(filme => 
+        filme.Title.toLowerCase().includes(searchText.toLowerCase()) ||
+        filme.Genre.toLowerCase().includes(searchText.toLowerCase()) ||
+        filme.Director.toLowerCase().includes(searchText.toLowerCase())
+      );
+      setFilmesFiltrados(filtrados);
+    }
+  }, [searchText, todosFilmes]);
+
+  const carregarFilmes = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Carregar todos os filmes da API
+      const filmes = await api.getFilmes({ limit: 100 });
+      
+      // Adicionar informações de sessão aos filmes
+      const filmesComSessao: FilmeComSessao[] = filmes.map(filme => {
+        const sessaoDisponivel = Math.random() > 0.2; // 80% de chance de estar disponível
+        const vagasDisponiveis = sessaoDisponivel 
+          ? Math.floor(Math.random() * 80) + 20 // Entre 20 e 100 vagas
+          : 0;
+        
+        return {
+          ...filme,
+          sessaoDisponivel,
+          vagasDisponiveis
+        };
+      });
+      
+      setTodosFilmes(filmesComSessao);
+      setFilmesFiltrados(filmesComSessao);
+    } catch (err) {
+      console.error('Erro ao carregar filmes da API:', err);
+      setError('Não foi possível conectar à API.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderFilmeItem = ({ item }: { item: FilmeComSessao }) => {
+    return (
+      <View style={styles.filmeContainer}>
+        <View style={styles.filmeItem}>
+          <Image 
+            source={{ uri: item.Poster }} 
+            style={styles.filmePoster}
+            defaultSource={require('../../assets/images/icon.png')}
+          />
+          <View style={styles.filmeInfo}>
+            <Text style={styles.filmeTitle}>{item.Title}</Text>
+            <Text style={styles.filmeYear}>{item.Year} • {item.Runtime}</Text>
+            <Text style={styles.filmeGenre}>{item.Genre}</Text>
+            <View style={styles.filmeFooter}>
+              <Text style={styles.filmeRating}>⭐ {item.imdbRating}</Text>
+              {item.ComingSoon && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>EM BREVE</Text>
+                </View>
+              )}
             </View>
-          )}
+          </View>
         </View>
+
+        {/* Container de Poltronas */}
+        {!item.ComingSoon && (
+          <View style={styles.seatsContainer}>
+            <View style={styles.seatsInfo}>
+              <Text style={styles.seatsTitle}>🪑 Sessão</Text>
+              <View style={[
+                styles.statusBadge, 
+                item.sessaoDisponivel ? styles.statusAvailable : styles.statusFull
+              ]}>
+                <Text style={styles.statusText}>
+                  {item.sessaoDisponivel 
+                    ? `✓ ${item.vagasDisponiveis} vagas disponíveis` 
+                    : '✕ Sessão Lotada'}
+                </Text>
+              </View>
+            </View>
+            
+            <TouchableOpacity 
+              style={[
+                styles.seatsButton,
+                !item.sessaoDisponivel && styles.seatsButtonDisabled
+              ]}
+              onPress={() => {
+                if (item.sessaoDisponivel) {
+                  router.push({
+                    pathname: '/(tabs)/seats',
+                    params: { 
+                      filmeId: item.codigo,
+                      filmeTitulo: item.Title,
+                      vagasDisponiveis: item.vagasDisponiveis
+                    }
+                  } as any);
+                }
+              }}
+              disabled={!item.sessaoDisponivel}
+            >
+              <Text style={styles.seatsButtonText}>
+                {item.sessaoDisponivel ? '🎟️ Escolher Poltronas' : '🚫 Indisponível'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
-    </TouchableOpacity>
-  );
+    );
+  };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator size="large" color="#E50914" />
+        <Text style={styles.loadingText}>Carregando filmes...</Text>
+      </View>
+    );
+  }
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>🎬 Cinema</Text>
-        <Text style={styles.headerSubtitle}>Filmes em Cartaz</Text>
+        <Text style={styles.headerTitle}>🔍 Pesquisar Filmes</Text>
+        
+        {/* Barra de pesquisa */}
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Buscar por título, gênero ou diretor..."
+            placeholderTextColor="#999"
+            value={searchText}
+            onChangeText={setSearchText}
+          />
+          {searchText.length > 0 && (
+            <TouchableOpacity 
+              style={styles.clearButton}
+              onPress={() => setSearchText('')}
+            >
+              <Text style={styles.clearButtonText}>✕</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Informações da busca */}
+        <Text style={styles.resultCount}>
+          {filmesFiltrados.length} {filmesFiltrados.length === 1 ? 'filme encontrado' : 'filmes encontrados'}
+        </Text>
+
+        {error && (
+          <View style={styles.errorBanner}>
+            <Text style={styles.errorText}>⚠️ {error}</Text>
+          </View>
+        )}
       </View>
 
-      {/* Filmes em Cartaz */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>📽️ Em Cartaz</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
-          {filmesEmCartaz.map(renderFilmeCard)}
-        </ScrollView>
-      </View>
-
-      {/* Lançamentos */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>🚀 Lançamentos</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
-          {lancamentos.map(renderFilmeCard)}
-        </ScrollView>
-      </View>
-
-      {/* Footer */}
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>Total de filmes: {filmes.length}</Text>
-      </View>
-    </ScrollView>
+      {/* Lista de filmes */}
+      <FlatList
+        data={filmesFiltrados}
+        renderItem={renderFilmeItem}
+        keyExtractor={(item) => item.codigo.toString()}
+        contentContainerStyle={styles.listContainer}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>🎬</Text>
+            <Text style={styles.emptyTitle}>Nenhum filme encontrado</Text>
+            <Text style={styles.emptySubtitle}>
+              Tente buscar por outro termo
+            </Text>
+          </View>
+        }
+      />
+    </View>
   );
 }
 
@@ -249,6 +216,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#141414",
+  },
+  centerContent: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#fff",
   },
   header: {
     padding: 20,
@@ -258,92 +234,186 @@ const styles = StyleSheet.create({
     borderBottomColor: "#333",
   },
   headerTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: "bold",
     color: "#E50914",
-    marginBottom: 5,
-  },
-  headerSubtitle: {
-    fontSize: 18,
-    color: "#fff",
-    opacity: 0.8,
-  },
-  section: {
-    marginVertical: 20,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#fff",
-    marginLeft: 20,
     marginBottom: 15,
   },
-  horizontalScroll: {
-    paddingLeft: 20,
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#2a2a2a",
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    marginBottom: 10,
   },
-  card: {
-    width: 180,
-    marginRight: 15,
+  searchInput: {
+    flex: 1,
+    height: 50,
+    color: "#fff",
+    fontSize: 16,
+  },
+  clearButton: {
+    padding: 10,
+  },
+  clearButtonText: {
+    color: "#999",
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  resultCount: {
+    fontSize: 14,
+    color: "#999",
+    marginTop: 5,
+  },
+  errorBanner: {
+    backgroundColor: "rgba(255, 152, 0, 0.2)",
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: "#ff9800",
+  },
+  errorText: {
+    color: "#ff9800",
+    fontSize: 12,
+    textAlign: "center",
+  },
+  listContainer: {
+    padding: 20,
+  },
+  filmeContainer: {
+    marginBottom: 20,
     backgroundColor: "#2a2a2a",
     borderRadius: 12,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowRadius: 4,
+    elevation: 4,
   },
-  poster: {
-    width: "100%",
-    height: 240,
+  filmeItem: {
+    flexDirection: "row",
+  },
+  filmePoster: {
+    width: 100,
+    height: 150,
     resizeMode: "cover",
   },
-  cardContent: {
+  filmeInfo: {
+    flex: 1,
     padding: 12,
+    justifyContent: "space-between",
   },
-  cardTitle: {
-    fontSize: 16,
+  filmeTitle: {
+    fontSize: 18,
     fontWeight: "bold",
     color: "#fff",
     marginBottom: 4,
   },
-  cardYear: {
+  filmeYear: {
     fontSize: 14,
-    color: "#E50914",
+    color: "#999",
     marginBottom: 4,
   },
-  cardGenre: {
+  filmeGenre: {
     fontSize: 12,
-    color: "#999",
+    color: "#E50914",
     marginBottom: 8,
   },
-  ratingContainer: {
+  filmeFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  rating: {
+  filmeRating: {
     fontSize: 14,
     color: "#ffd700",
     fontWeight: "bold",
   },
-  comingSoonBadge: {
+  badge: {
     backgroundColor: "#E50914",
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 4,
   },
-  comingSoonText: {
+  badgeText: {
     fontSize: 10,
     color: "#fff",
     fontWeight: "bold",
   },
-  footer: {
-    padding: 20,
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 60,
+  },
+  emptyText: {
+    fontSize: 60,
+    marginBottom: 10,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 5,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: "#999",
+  },
+  seatsContainer: {
+    padding: 15,
+    backgroundColor: "#1f1f1f",
+    borderTopWidth: 1,
+    borderTopColor: "#333",
+  },
+  seatsInfo: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  seatsTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  statusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  statusAvailable: {
+    backgroundColor: "rgba(0, 255, 0, 0.2)",
+    borderWidth: 1,
+    borderColor: "#00ff00",
+  },
+  statusFull: {
+    backgroundColor: "rgba(229, 9, 20, 0.2)",
+    borderWidth: 1,
+    borderColor: "#E50914",
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  seatsButton: {
+    backgroundColor: "#E50914",
+    padding: 12,
+    borderRadius: 8,
     alignItems: "center",
   },
-  footerText: {
+  seatsButtonDisabled: {
+    backgroundColor: "#555",
+  },
+  seatsButtonText: {
+    color: "#fff",
     fontSize: 14,
-    color: "#666",
+    fontWeight: "bold",
   },
 });
+
+
+
