@@ -2,16 +2,19 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  FlatList,
+  Dimensions,
   Image,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View
 } from "react-native";
+import { WebView } from 'react-native-webview';
 import { api, Filme } from '../services/api';
-import { ColorProperties } from 'react-native-reanimated/lib/typescript/Colors';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 // Interface estendida para adicionar disponibilidade
 interface FilmeComSessao extends Filme {
@@ -25,6 +28,7 @@ export default function Index() {
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedMovie, setSelectedMovie] = useState<FilmeComSessao | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -84,7 +88,11 @@ export default function Index() {
           <Image 
             source={{ uri: item.Poster }} 
             style={styles.filmePoster}
+            resizeMode="cover"
             defaultSource={require('../../assets/images/icon.png')}
+            onError={() => {
+              console.log('Erro ao carregar imagem:', item.Title);
+            }}
           />
           <View style={styles.filmeInfo}>
             <Text style={styles.filmeTitle} numberOfLines={2}>{item.Title}</Text>
@@ -127,10 +135,46 @@ export default function Index() {
             )}
           </View>
         </View>
-
       </View>
     );
   };
+
+  const renderYouTubePlayer = () => {
+    // Sempre mostrar o trailer do Avatar
+    const avatarVideoId = '5PSNL1qE6VY'; // Trailer oficial do Avatar
+    const embedUrl = `https://www.youtube.com/embed/${avatarVideoId}?autoplay=0&rel=0&modestbranding=1&showinfo=0&controls=1&fs=1`;
+
+    return (
+      <View style={styles.videoContainer}>
+        <Text style={styles.videoTitle}>Avatar</Text>
+        <Text style={styles.videoSubtitle}>Trailer Oficial</Text>
+        
+        {/* WebView com o trailer do Avatar */}
+        <View style={styles.youtubeContainer}>
+          <WebView
+            source={{ uri: embedUrl }}
+            style={styles.webview}
+            allowsFullscreenVideo={true}
+            mediaPlaybackRequiresUserAction={false}
+            startInLoadingState={true}
+            renderLoading={() => (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#E50914" />
+                <Text style={styles.videoLoadingText}>Carregando trailer...</Text>
+              </View>
+            )}
+          />
+        </View>
+        
+        <View style={styles.videoInfo}>
+          <Text style={styles.videoYear}>2009 • 162 min</Text>
+          <Text style={styles.videoGenre}>Action, Adventure, Fantasy</Text>
+          <Text style={styles.videoRating}>⭐ 7.9</Text>
+        </View>
+      </View>
+    );
+  };
+
 
   if (loading) {
     return (
@@ -178,22 +222,33 @@ export default function Index() {
         )}
       </View>
 
-      {/* Lista de filmes */}
-      <FlatList
-        data={filmesFiltrados}
-        renderItem={renderFilmeItem}
-        keyExtractor={(item) => item.codigo.toString()}
-        contentContainerStyle={styles.listContainer}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>🎬</Text>
-            <Text style={styles.emptyTitle}>Nenhum filme encontrado</Text>
-            <Text style={styles.emptySubtitle}>
-              Tente buscar por outro termo
-            </Text>
+      {/* Layout em duas colunas */}
+      <View style={styles.mainContainer}>
+        {/* Coluna dos Cards */}
+        <ScrollView 
+          style={styles.cardsContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.resultsGrid}>
+            {filmesFiltrados.length > 0 ? (
+              filmesFiltrados.map((item) => renderFilmeItem({ item }))
+            ) : (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>🎬</Text>
+                <Text style={styles.emptyTitle}>Nenhum filme encontrado</Text>
+                <Text style={styles.emptySubtitle}>
+                  Tente buscar por outro termo
+                </Text>
+              </View>
+            )}
           </View>
-        }
-      />
+        </ScrollView>
+        
+        {/* Coluna do Vídeo */}
+        <View style={styles.videoSection}>
+          {renderYouTubePlayer()}
+        </View>
+      </View>
     </View>
   );
 }
@@ -222,7 +277,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#E50914",
+    color: "#E5091",
     marginBottom: 15,
   },
   searchContainer: {
@@ -265,68 +320,79 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: "center",
   },
-  listContainer: {
+  mainContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  cardsContainer: {
+    flex: 1,
     padding: 12,
+    backgroundColor: '#141414',
+  },
+  videoSection: {
+    width: 180, // Mesmo tamanho dos cards
+    padding: 12,
+    backgroundColor: '#1a1a1a',
+    borderLeftWidth: 1,
+    borderLeftColor: '#333',
+    marginLeft: 10,
   },
   resultsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 8,
+    justifyContent: 'flex-start',
   },
   filmeContainer: {
+    width: 160, // Largura reduzida para caber na coluna
+    marginRight: 10,
+    marginBottom: 15,
     backgroundColor: "#2a2a2a",
-    marginBottom: 10,
-    borderRadius: 8,
+    borderRadius: 12,
     overflow: "hidden",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    width: '45%', // Largura ideal para o tamanho da imagem
+    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)",
+    elevation: 8,
+  },
+  selectedCard: {
+    borderWidth: 2,
+    borderColor: "#E50914",
   },
   filmeItem: {
     flexDirection: "column", // Mudança para layout vertical
-    backgroundColor: "#1a1a1a",
+    backgroundColor: "#2a2a2a",
   },
   filmePoster: {
-    width: '25%', // Largura total do container
-    height: 150, // Altura maior para dar destaque ao poster como na imagem
-    resizeMode: "cover",
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
+    width: "100%",
+    height: 240,
   },
   filmeInfo: {
-    padding: 8,
+    padding: 12,
     justifyContent: "space-between",
     minHeight: 70,
   },
   filmeTitle: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "bold",
     color: "#fff",
-    marginBottom: 2,
-    lineHeight: 16,
+    marginBottom: 4,
   },
   filmeYear: {
-    fontSize: 11,
-    color: "#999",
-    marginBottom: 2,
-  },
-  filmeGenre: {
-    fontSize: 10,
+    fontSize: 14,
     color: "#E50914",
     marginBottom: 4,
+  },
+  filmeGenre: {
+    fontSize: 12,
+    color: "#999",
+    marginBottom: 8,
   },
   filmeFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 4,
   },
   filmeRating: {
-    fontSize: 11,
+    fontSize: 14,
     color: "#ffd700",
     fontWeight: "bold",
   },
@@ -398,13 +464,12 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   seatsButtonCompact: {
-    height: 50,
-    width: 180,
     backgroundColor: "#E50914",
     padding: 8,
     borderRadius: 6,
     alignItems: "center",
     marginTop: 6,
+    width: "100%",
   },
   seatsButton: {
     backgroundColor: "#E50914",
@@ -420,6 +485,89 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 10,
     fontWeight: "bold",
+  },
+  videoPlaceholder: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1a1a1a',
+  },
+  placeholderText: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
+  placeholderTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 8,
+  },
+  placeholderSubtitle: {
+    fontSize: 14,
+    color: '#999',
+  },
+  placeholderHint: {
+    fontSize: 12,
+    color: '#E50914',
+    marginTop: 16,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  videoContainer: {
+    width: '100%',
+  },
+  videoTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 2,
+  },
+  videoSubtitle: {
+    fontSize: 12,
+    color: '#E50914',
+    marginBottom: 12,
+  },
+  youtubeContainer: {
+    width: '100%',
+    height: 240, // Mesma altura dos posters dos cards
+    backgroundColor: '#000',
+    borderRadius: 8,
+    marginBottom: 16,
+    overflow: 'hidden',
+  },
+  webview: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000',
+  },
+  videoLoadingText: {
+    color: '#fff',
+    marginTop: 10,
+    fontSize: 14,
+  },
+  videoInfo: {
+    padding: 8,
+    backgroundColor: '#2a2a2a',
+    borderRadius: 8,
+  },
+  videoYear: {
+    fontSize: 14,
+    color: '#E50914',
+    marginBottom: 4,
+  },
+  videoGenre: {
+    fontSize: 12,
+    color: '#999',
+    marginBottom: 4,
+  },
+  videoRating: {
+    fontSize: 14,
+    color: '#ffd700',
+    fontWeight: 'bold',
   },
 });
 

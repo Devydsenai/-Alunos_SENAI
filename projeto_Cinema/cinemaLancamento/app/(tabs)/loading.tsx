@@ -9,17 +9,17 @@ export default function LoadScreen() {
   useEffect(() => {
     // Animação de entrada
     Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 1000,
-        useNativeDriver: true,
-      }),
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        friction: 4,
-        tension: 40,
-        useNativeDriver: true,
-      }),
+           Animated.timing(fadeAnim, {
+             toValue: 1,
+             duration: 1000,
+             useNativeDriver: false,
+           }),
+           Animated.spring(scaleAnim, {
+             toValue: 1,
+             friction: 4,
+             tension: 40,
+             useNativeDriver: false,
+           }),
     ]).start();
 
     // Redireciona para a tela de pesquisa após 3 segundos
