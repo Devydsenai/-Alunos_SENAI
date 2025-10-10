@@ -1,24 +1,20 @@
-import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 import { useVideoPlayer } from 'expo-video';
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View
-} from "react-native";
-import { MovieCard, SearchBar, VideoPlayer } from '../../components';
+import { ActivityIndicator } from "react-native";
+import * as cores from '../../../styles/cores';
+import { MovieCard, SearchBar, VideoPlayer } from '../components';
 import { tmdb, TMDBFilme } from '../services/tmdb';
+import * as S from './ExploreScreen.styles';
 
 // Interface estendida para adicionar disponibilidade
 interface FilmeComSessao extends TMDBFilme {
   sessaoDisponivel: boolean;
   vagasDisponiveis: number;
-  generoNomes?: string; // Para armazenar os nomes dos gêneros
+  generoNomes?: string;
 }
 
-export default function Index() {
+export default function Explore() {
   const [todosFilmes, setTodosFilmes] = useState<FilmeComSessao[]>([]);
   const [filmesFiltrados, setFilmesFiltrados] = useState<FilmeComSessao[]>([]);
   const [searchText, setSearchText] = useState('');
@@ -27,7 +23,7 @@ export default function Index() {
   const [selectedMovie, setSelectedMovie] = useState<FilmeComSessao | null>(null);
   const [trailerUrl, setTrailerUrl] = useState<string>('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4');
   const [loadingTrailer, setLoadingTrailer] = useState(false);
-  const router = useRouter();
+  const navigation = useNavigation();
 
   // Player de vídeo
   const player = useVideoPlayer(trailerUrl, player => {
@@ -162,32 +158,27 @@ export default function Index() {
   };
 
   const handleSeatsPress = (filmeId: number, filmeTitulo: string, vagasDisponiveis: number) => {
-    router.push({
-      pathname: '/(tabs)/seats',
-      params: { 
-        filmeId,
-        filmeTitulo,
-        vagasDisponiveis
-      }
-    } as any);
+    navigation.navigate('Seats' as never, {
+      filmeId,
+      filmeTitulo,
+      vagasDisponiveis
+    } as never);
   };
-
-
 
   if (loading) {
     return (
-      <View style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" color="#E50914" />
-        <Text style={styles.loadingText}>Carregando filmes...</Text>
-      </View>
+      <S.Container style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={cores.vermelhoPrimario} />
+        <S.LoadingText>Carregando filmes...</S.LoadingText>
+      </S.Container>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <S.Container>
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>🔍 Pesquisar Filmes</Text>
+      <S.Header>
+        <S.HeaderTitle>🔍 Explorar Filmes</S.HeaderTitle>
         
         {/* Barra de pesquisa */}
         <SearchBar 
@@ -197,20 +188,17 @@ export default function Index() {
         />
 
         {error && (
-          <View style={styles.errorBanner}>
-            <Text style={styles.errorText}>⚠️ {error}</Text>
-          </View>
+          <S.ErrorBanner>
+            <S.ErrorText>⚠️ {error}</S.ErrorText>
+          </S.ErrorBanner>
         )}
-      </View>
+      </S.Header>
 
       {/* Layout em duas colunas */}
-      <View style={styles.mainContainer}>
+      <S.MainContainer>
         {/* Coluna dos Cards */}
-        <ScrollView 
-          style={styles.cardsContainer}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.resultsGrid}>
+        <S.CardsContainer showsVerticalScrollIndicator={false}>
+          <S.ResultsGrid>
             {filmesFiltrados.length > 0 ? (
               filmesFiltrados.map((item) => (
                 <MovieCard
@@ -222,110 +210,27 @@ export default function Index() {
                 />
               ))
             ) : (
-              <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>🎬</Text>
-                <Text style={styles.emptyTitle}>Nenhum filme encontrado</Text>
-                <Text style={styles.emptySubtitle}>
+              <S.EmptyContainer>
+                <S.EmptyText>🎬</S.EmptyText>
+                <S.EmptyTitle>Nenhum filme encontrado</S.EmptyTitle>
+                <S.EmptySubtitle>
                   Tente buscar por outro termo
-                </Text>
-              </View>
+                </S.EmptySubtitle>
+              </S.EmptyContainer>
             )}
-          </View>
-        </ScrollView>
+          </S.ResultsGrid>
+        </S.CardsContainer>
         
         {/* Coluna do Player de Vídeo */}
-        <View style={styles.videoSection}>
+        <S.VideoSection>
           <VideoPlayer 
             player={player}
             selectedMovie={selectedMovie}
             loading={loadingTrailer}
           />
-        </View>
-      </View>
-    </View>
+        </S.VideoSection>
+      </S.MainContainer>
+    </S.Container>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#141414",
-  },
-  centerContent: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: "#fff",
-  },
-  header: {
-    padding: 20,
-    paddingTop: 60,
-    backgroundColor: "#1a1a1a",
-    borderBottomWidth: 1,
-    borderBottomColor: "#333",
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#E50914",
-    marginBottom: 15,
-  },
-  errorBanner: {
-    backgroundColor: "rgba(255, 152, 0, 0.2)",
-    padding: 10,
-    borderRadius: 8,
-    marginTop: 10,
-    borderWidth: 1,
-    borderColor: "#ff9800",
-  },
-  errorText: {
-    color: "#ff9800",
-    fontSize: 12,
-    textAlign: "center",
-  },
-  mainContainer: {
-    flex: 1,
-    flexDirection: 'row',
-  },
-  cardsContainer: {
-    flex: 1,
-    padding: 15,
-    backgroundColor: '#141414',
-  },
-  videoSection: {
-    width: 350,
-    padding: 15,
-    backgroundColor: '#1a1a1a',
-    borderLeftWidth: 1,
-    borderLeftColor: '#333',
-  },
-  resultsGrid: {
-    flexDirection: 'column',
-    gap: 15,
-  },
-  emptyContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 60,
-  },
-  emptyText: {
-    fontSize: 60,
-    marginBottom: 10,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 5,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    color: "#999",
-  },
-});
-
-
 

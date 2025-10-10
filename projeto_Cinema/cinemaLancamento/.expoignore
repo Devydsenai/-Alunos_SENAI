@@ -1,0 +1,17 @@
+# Ignorar pasta src completamente - usando React Navigation
+app/src/
+app/navigation/
+
+# Ignorar arquivos de styles
+**/*.styles.ts
+**/*.styles.tsx
+
+# Ignorar context e services
+**/context/
+**/services/
+
+# Ignorar componentes
+**/components/
+
+# Ignorar READMEs
+**/README.md

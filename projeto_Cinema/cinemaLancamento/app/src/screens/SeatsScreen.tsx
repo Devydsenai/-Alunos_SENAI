@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useEffect, useState } from "react";
 import {
     Alert,
@@ -19,8 +19,9 @@ interface Seat {
 }
 
 export default function SeatsScreen() {
-  const router = useRouter();
-  const params = useLocalSearchParams();
+  const navigation = useNavigation();
+  const route = useRoute();
+  const params = route.params as any;
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   
   // Dados do filme vindos da navegação
@@ -161,7 +162,7 @@ export default function SeatsScreen() {
           onPress={() => {
             // Limpar seleções antes de voltar
             setSelectedSeats([]);
-            router.push('/(tabs)' as any);
+            navigation.goBack();
           }}
         >
           <Text style={styles.backButtonText}>← Voltar para Pesquisa</Text>
