@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView } from 'react-native';
-import * as cores from '../../../styles/cores';
-import { api } from '../services/api';
-import * as S from './SignupScreen.styles';
+import * as cores from '../../../../styles/cores';
+import { api } from '../../services/api';
+import * as S from './styles';
 
 export default function Cadastro() {
   const [loading, setLoading] = useState(false);
@@ -23,6 +23,7 @@ export default function Cadastro() {
     Poster: '',
     imdbRating: '',
     ComingSoon: false,
+    disponivel: true,
   });
 
   const handleSubmit = async () => {
@@ -57,6 +58,7 @@ export default function Cadastro() {
               Poster: '',
               imdbRating: '',
               ComingSoon: false,
+              disponivel: true,
             });
           },
         },

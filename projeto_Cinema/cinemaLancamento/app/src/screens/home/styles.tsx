@@ -1,5 +1,5 @@
 import styled from 'styled-components/native';
-import * as cores from '../../../styles/cores';
+import * as cores from '../../../../styles/cores';
 
 export const Container = styled.View`
   flex: 1;
@@ -67,6 +67,8 @@ export const FilmeCard = styled.TouchableOpacity`
   position: relative;
   border-radius: 8px;
   overflow: hidden;
+  width: 280px;
+  height: 280px;
 `;
 
 export const FilmePoster = styled.Image`
@@ -75,35 +77,58 @@ export const FilmePoster = styled.Image`
 
 export const FilmeRating = styled.Text`
   position: absolute;
-  top: 6px;
-  right: 6px;
+  top: 8px;
+  right: 8px;
   background-color: ${cores.pretoTransparente80};
   color: ${cores.douradoPremium};
-  font-size: 11px;
+  font-size: 12px;
   font-weight: bold;
-  padding: 3px 6px;
-  border-radius: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  z-index: 10;
 `;
 
 export const StatusBadge = styled.View`
   position: absolute;
-  top: 6px;
-  left: 6px;
-  padding: 4px 8px;
-  border-radius: 4px;
+  top: 8px;
+  left: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
   align-items: center;
   shadow-color: #000;
-  shadow-offset: 0px 1px;
-  shadow-opacity: 0.6;
-  shadow-radius: 3px;
-  elevation: 4;
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.8;
+  shadow-radius: 4px;
+  elevation: 6;
+  z-index: 10;
 `;
 
 export const StatusText = styled.Text`
   color: ${cores.brancoTotal};
-  font-size: 9px;
+  font-size: 10px;
   font-weight: bold;
   text-transform: uppercase;
+`;
+
+export const AdminToggleContainer = styled.View`
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
+  background-color: ${cores.pretoTransparente90};
+  padding: 8px 12px;
+  border-radius: 8px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+`;
+
+export const AdminToggleLabel = styled.Text`
+  color: ${cores.brancoTotal};
+  font-size: 11px;
+  font-weight: bold;
+  flex: 1;
 `;
 
 export const ErrorBanner = styled.View`

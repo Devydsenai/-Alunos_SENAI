@@ -3,9 +3,9 @@ import { Dimensions, FlatList } from 'react-native';
 import * as S from './styles';
 
 const { width } = Dimensions.get('window');
-const CARD_WIDTH = 250;  // Tamanho bem maior para melhor visualização
+const CARD_WIDTH = 280;  // Ajustado para o novo tamanho do container
 const CARD_MARGIN = 16;
-const CARDS_PER_VIEW = 1.5;  // Ainda menos cards visíveis para acomodar tamanho bem maior
+const CARDS_PER_VIEW = 1.3;  // Ajustado para o novo tamanho
 
 interface MovieCarouselProps {
   data: any[];

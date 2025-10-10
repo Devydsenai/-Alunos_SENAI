@@ -53,7 +53,7 @@ export const Subtitle = styled.Text`
 export const PlayerContainer = styled.View`
   width: 100%;
   height: 280px;
-  background-color: ${cores.corPlayer};
+  background-color: ${cores.cinzaProfundo};
   border-radius: 12px;
   margin-bottom: 15px;
   overflow: hidden;
@@ -68,7 +68,7 @@ export const LoadingContainer = styled.View`
   flex: 1;
   justify-content: center;
   align-items: center;
-  background-color: ${cores.corPlayer};
+  background-color: ${cores.cinzaProfundo};
 `;
 
 export const LoadingText = styled.Text`
@@ -97,7 +97,7 @@ export const Genre = styled.Text`
 
 export const Rating = styled.Text`
   font-size: 16px;
-  color: ${cores.dourado};
+  color: ${cores.douradoPremium};
   font-weight: bold;
 `;
 

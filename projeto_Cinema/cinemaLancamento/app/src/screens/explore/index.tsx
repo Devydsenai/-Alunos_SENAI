@@ -2,10 +2,10 @@ import { useNavigation } from '@react-navigation/native';
 import { useVideoPlayer } from 'expo-video';
 import { useEffect, useState } from "react";
 import { ActivityIndicator } from "react-native";
-import * as cores from '../../../styles/cores';
-import { MovieCard, SearchBar, VideoPlayer } from '../components';
-import { tmdb, TMDBFilme } from '../services/tmdb';
-import * as S from './ExploreScreen.styles';
+import * as cores from '../../../../styles/cores';
+import { MovieCard, SearchBar, VideoPlayer } from '../../components';
+import { tmdb, TMDBFilme } from '../../services/tmdb';
+import * as S from './styles';
 
 // Interface estendida para adicionar disponibilidade
 interface FilmeComSessao extends TMDBFilme {
@@ -158,11 +158,11 @@ export default function Explore() {
   };
 
   const handleSeatsPress = (filmeId: number, filmeTitulo: string, vagasDisponiveis: number) => {
-    navigation.navigate('Seats' as never, {
+    navigation.navigate('Seats', {
       filmeId,
       filmeTitulo,
       vagasDisponiveis
-    } as never);
+    });
   };
 
   if (loading) {

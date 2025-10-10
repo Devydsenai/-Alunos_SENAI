@@ -12,7 +12,7 @@ export const Container = styled.TouchableOpacity<{ isSelected: boolean }>`
   border-radius: 12px;
   overflow: hidden;
   elevation: 8;
-  ${props => props.isSelected && `
+  ${(props: { isSelected?: boolean }) => props.isSelected && `
     border-width: 2px;
     border-color: ${cores.vermelhoPrimario};
   `}
@@ -61,7 +61,7 @@ export const Footer = styled.View`
 
 export const Rating = styled.Text`
   font-size: 14px;
-  color: ${cores.dourado};
+  color: ${cores.douradoPremium};
   font-weight: bold;
 `;
 
@@ -79,7 +79,7 @@ export const BadgeText = styled.Text`
 `;
 
 export const SeatsButton = styled.TouchableOpacity<{ disabled: boolean }>`
-  background-color: ${props => props.disabled ? cores.cinzaDesabilitado : cores.vermelhoPrimario};
+  background-color: ${(props: { disabled: boolean }) => props.disabled ? cores.cinzaDesabilitado : cores.vermelhoPrimario};
   padding: 10px;
   border-radius: 8px;
   align-items: center;

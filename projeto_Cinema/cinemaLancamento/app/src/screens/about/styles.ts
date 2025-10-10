@@ -1,5 +1,5 @@
 import styled from 'styled-components/native';
-import * as cores from '../../../styles/cores';
+import * as cores from '../../../../styles/cores';
 
 export const Container = styled.View`
   flex: 1;
@@ -49,11 +49,11 @@ export const Description = styled.Text`
 
 // Status Card
 export const StatusCard = styled.View<{ isAdmin: boolean }>`
-  background-color: ${props => props.isAdmin ? cores.vermelhoTransparente20 : cores.cinzaCard};
+  background-color: ${(props: { isAdmin: boolean }) => props.isAdmin ? cores.vermelhoTransparente20 : cores.cinzaCard};
   padding: 20px;
   border-radius: 12px;
   border-width: 2px;
-  border-color: ${props => props.isAdmin ? cores.vermelhoPrimario : cores.cinzaBorda};
+  border-color: ${(props: { isAdmin: boolean }) => props.isAdmin ? cores.vermelhoPrimario : cores.cinzaBorda};
   align-items: center;
 `;
 

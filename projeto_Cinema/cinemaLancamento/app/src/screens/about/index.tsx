@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Alert, ScrollView } from 'react-native';
-import * as cores from '../../../styles/cores';
-import { useAuth } from '../context/AuthContext';
-import * as S from './AboutScreen.styles';
+import * as cores from '../../../../styles/cores';
+import { useAuth } from '../../context/AuthContext';
+import * as S from './styles';
 
 export default function About() {
   const { isAdmin, loginAsAdmin, loginAsClient, userRole } = useAuth();

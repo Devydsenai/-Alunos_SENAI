@@ -3,11 +3,13 @@ import { useEffect, useState } from "react";
 import {
     Alert,
     ScrollView,
-    StyleSheet,
     Text,
     TouchableOpacity,
     View
 } from "react-native";
+import { useAuth } from '../../context/AuthContext';
+import { poltronasService } from '../../services/poltronas';
+import { styles } from './styles';
 
 // Tipos de poltronas
 type SeatStatus = 'available' | 'selected' | 'occupied';
@@ -22,6 +24,7 @@ export default function SeatsScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const params = route.params as any;
+  const { isAdmin } = useAuth();
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   
   // Dados do filme vindos da navegação
@@ -29,10 +32,23 @@ export default function SeatsScreen() {
   const filmeTitulo = params.filmeTitulo || 'Filme';
   const vagasDisponiveis = Number(params.vagasDisponiveis) || 60;
   
-  // Reset seleções sempre que o filmeId mudar
+  // Carregar poltronas ocupadas da API
   useEffect(() => {
     setSelectedSeats([]);
+    carregarPoltronasOcupadas();
   }, [filmeId]);
+  
+  const carregarPoltronasOcupadas = async () => {
+    try {
+      const poltronasAPI = await poltronasService.getPoltronasFilme(filmeId);
+      const ocupadas = poltronasAPI
+        .filter(p => p.status === 'reservada')
+        .map(p => p.poltrona);
+      setOccupiedSeats(ocupadas);
+    } catch (error) {
+      console.log('Sem poltronas reservadas ainda ou API offline');
+    }
+  };
   
   // Criar layout de poltronas (10 fileiras x 12 poltronas)
   const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
@@ -54,7 +70,6 @@ export default function SeatsScreen() {
     });
     
     // Usar o ID do filme como seed para gerar poltronas ocupadas consistentes
-    // Assim cada filme terá sempre as mesmas poltronas ocupadas
     const seed = Number(filmeId) || 1;
     const seededRandom = (index: number) => {
       const x = Math.sin(seed * index) * 10000;
@@ -71,7 +86,7 @@ export default function SeatsScreen() {
     return shuffled.slice(0, occupiedCount);
   };
   
-  const [occupiedSeats] = useState<string[]>(generateOccupiedSeats());
+  const [occupiedSeats, setOccupiedSeats] = useState<string[]>(generateOccupiedSeats());
 
   const toggleSeat = (seatId: string) => {
     if (occupiedSeats.includes(seatId)) {
@@ -94,26 +109,23 @@ export default function SeatsScreen() {
     return 'available';
   };
 
-  const confirmarReserva = () => {
-    if (selectedSeats.length === 0) {
-      Alert.alert('Atenção', 'Selecione pelo menos uma poltrona.');
-      return;
+  const desocuparSala = async () => {
+    try {
+      // Deletar do banco
+      await poltronasService.limparSala(filmeId);
+      
+      // Limpar tela (poltronas ficam cinzas)
+      setOccupiedSeats([]);
+      setSelectedSeats([]);
+      
+      // Mensagem de sucesso
+      Alert.alert(
+        '✅ Sala Desocupada!', 
+        'Todas as poltronas foram liberadas!\n\n🔴 Vermelhas → ⚪ Cinzas\n\n🗑️ Deletado do banco de dados!'
+      );
+    } catch (error) {
+      Alert.alert('❌ Erro', 'Não foi possível desocupar a sala. Verifique se a API está rodando.');
     }
-
-    Alert.alert(
-      'Confirmar Reserva',
-      `Você selecionou ${selectedSeats.length} poltrona(s): ${selectedSeats.sort().join(', ')}`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { 
-          text: 'Confirmar', 
-          onPress: () => {
-            Alert.alert('Sucesso!', 'Sua reserva foi confirmada!');
-            setSelectedSeats([]);
-          }
-        }
-      ]
-    );
   };
 
   const renderSeat = (row: string, number: number) => {
@@ -160,7 +172,6 @@ export default function SeatsScreen() {
         <TouchableOpacity 
           style={styles.backButton} 
           onPress={() => {
-            // Limpar seleções antes de voltar
             setSelectedSeats([]);
             navigation.goBack();
           }}
@@ -174,6 +185,16 @@ export default function SeatsScreen() {
             💺 {vagasDisponiveis - selectedSeats.length} vagas disponíveis
           </Text>
         </View>
+        
+        {/* Botão de Admin */}
+        {isAdmin && (
+          <TouchableOpacity 
+            style={styles.adminButton}
+            onPress={desocuparSala}
+          >
+            <Text style={styles.adminButtonText}>🔧 Desocupar Sala</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Tela do cinema */}
@@ -220,7 +241,46 @@ export default function SeatsScreen() {
       <View style={styles.footer}>
         <TouchableOpacity 
           style={[styles.confirmButton, selectedSeats.length === 0 && styles.confirmButtonDisabled]}
-          onPress={confirmarReserva}
+          onPress={async () => {
+            if (selectedSeats.length === 0) {
+              return;
+            }
+            
+            // Salvar poltronas
+            const poltronas = [...selectedSeats];
+            
+            try {
+              // 1. SALVAR NA API
+              const resultado = await poltronasService.reservarPoltronas({
+                filmeId: filmeId,
+                filmeTitulo: filmeTitulo,
+                poltronas: poltronas,
+                clienteNome: 'Cliente',
+                clienteEmail: 'cliente@cinema.com'
+              });
+              
+              // 2. MARCAR VERMELHAS
+              setOccupiedSeats(prev => [...prev, ...poltronas]);
+              setSelectedSeats([]);
+              
+              // 3. MOSTRAR SUCESSO
+              Alert.alert(
+                '✅ RESERVA CONFIRMADA!',
+                `🎫 Poltronas: ${poltronas.join(', ')}\n\n🎬 Filme: ${filmeTitulo}\n\n💰 Total: R$ ${resultado.totalPago.toFixed(2)}\n\n🔴 Poltronas agora estão VERMELHAS!\n\n💾 ${resultado.message}`,
+                [
+                  {
+                    text: 'OK - Voltar ao Início',
+                    onPress: () => {
+                      (navigation as any).navigate('MainTabs', { screen: 'Home' });
+                    }
+                  }
+                ]
+              );
+              
+            } catch (error) {
+              Alert.alert('❌ Erro', 'Não foi possível salvar. Verifique se a API está rodando.');
+            }
+          }}
           disabled={selectedSeats.length === 0}
         >
           <Text style={styles.confirmButtonText}>
@@ -231,195 +291,8 @@ export default function SeatsScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#141414",
-  },
-  centerContent: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  header: {
-    padding: 20,
-    paddingTop: 60,
-    backgroundColor: "#1a1a1a",
-    borderBottomWidth: 1,
-    borderBottomColor: "#333",
-  },
-  backButton: {
-    marginBottom: 10,
-  },
-  backButtonText: {
-    color: "#E50914",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#E50914",
-    marginBottom: 5,
-  },
-  headerSubtitle: {
-    fontSize: 18,
-    color: "#fff",
-    marginBottom: 10,
-  },
-  availabilityInfo: {
-    backgroundColor: "rgba(0, 255, 0, 0.1)",
-    padding: 8,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: "#00ff00",
-    marginTop: 5,
-  },
-  availabilityText: {
-    color: "#00ff00",
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  screenContainer: {
-    alignItems: "center",
-    marginVertical: 20,
-  },
-  screen: {
-    width: "80%",
-    height: 6,
-    backgroundColor: "#E50914",
-    borderRadius: 50,
-    shadowColor: "#E50914",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
-    elevation: 5,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 5,
-  },
-  screenText: {
-    color: "#fff",
-    fontSize: 10,
-    fontWeight: "bold",
-    position: "absolute",
-    top: -20,
-  },
-  legend: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 20,
-    marginBottom: 20,
-    paddingHorizontal: 20,
-  },
-  legendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  legendBox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-  },
-  legendText: {
-    color: "#fff",
-    fontSize: 12,
-  },
-  seatsContainer: {
-    paddingHorizontal: 10,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  rowLabel: {
-    width: 30,
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  seatsRow: {
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 6,
-  },
-  seat: {
-    width: 28,
-    height: 28,
-    backgroundColor: "#4a4a4a",
-    borderRadius: 6,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#666",
-  },
-  seatAvailable: {
-    backgroundColor: "#4a4a4a",
-    borderColor: "#666",
-  },
-  seatSelected: {
-    backgroundColor: "#00ff00",
-    borderColor: "#00cc00",
-  },
-  seatOccupied: {
-    backgroundColor: "#E50914",
-    borderColor: "#b00712",
-  },
-  seatText: {
-    color: "#fff",
-    fontSize: 10,
-    fontWeight: "bold",
-  },
-  seatTextSelected: {
-    color: "#000",
-  },
-  seatTextOccupied: {
-    color: "#fff",
-    opacity: 0.5,
-  },
-  summary: {
-    backgroundColor: "#2a2a2a",
-    padding: 15,
-    marginHorizontal: 20,
-    marginVertical: 20,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#00ff00",
-  },
-  summaryTitle: {
-    color: "#fff",
-    fontSize: 14,
-    marginBottom: 5,
-  },
-  summaryPrice: {
-    color: "#00ff00",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  footer: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  confirmButton: {
-    backgroundColor: "#E50914",
-    padding: 16,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  confirmButtonDisabled: {
-    backgroundColor: "#555",
-  },
-  confirmButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-});
 

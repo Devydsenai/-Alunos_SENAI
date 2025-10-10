@@ -26,6 +26,7 @@ export interface Filme {
   Response?: string;
   Images?: string[];
   ComingSoon: boolean;
+  disponivel: boolean;
   totalSeasons?: string;
 }
 
@@ -140,6 +141,14 @@ class ApiService {
     return this.request<Filme>(`/filmes/${codigo}`, {
       method: 'PATCH',
       body: JSON.stringify(dados),
+    });
+  }
+
+  // PATCH: Atualizar disponibilidade do filme
+  async atualizarDisponibilidade(codigo: number, disponivel: boolean): Promise<Filme> {
+    return this.request<Filme>(`/filmes/${codigo}/disponibilidade`, {
+      method: 'PATCH',
+      body: JSON.stringify({ disponivel }),
     });
   }
 

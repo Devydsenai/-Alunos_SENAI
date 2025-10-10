@@ -1,5 +1,5 @@
 import styled from 'styled-components/native';
-import * as cores from '../../../styles/cores';
+import * as cores from '../../../../styles/cores';
 
 // ========================================
 // 🏠 Home Screen Styled Components
@@ -7,7 +7,7 @@ import * as cores from '../../../styles/cores';
 
 export const Container = styled.View`
   flex: 1;
-  background-color: ${cores.pretoPrincipal};
+  background-color: ${cores.pretoProfundo};
 `;
 
 export const CenterContent = styled.View`
@@ -18,7 +18,7 @@ export const CenterContent = styled.View`
 export const LoadingText = styled.Text`
   margin-top: 10px;
   font-size: 16px;
-  color: ${cores.branco};
+  color: ${cores.brancoTotal};
 `;
 
 export const Header = styled.View`
@@ -59,7 +59,7 @@ export const MainContainer = styled.View`
 export const CardsContainer = styled.ScrollView`
   flex: 1;
   padding: 15px;
-  background-color: ${cores.pretoPrincipal};
+  background-color: ${cores.pretoProfundo};
 `;
 
 export const VideoSection = styled.View`
@@ -88,7 +88,7 @@ export const EmptyText = styled.Text`
 export const EmptyTitle = styled.Text`
   font-size: 20px;
   font-weight: bold;
-  color: ${cores.branco};
+  color: ${cores.brancoTotal};
   margin-bottom: 5px;
 `;
 

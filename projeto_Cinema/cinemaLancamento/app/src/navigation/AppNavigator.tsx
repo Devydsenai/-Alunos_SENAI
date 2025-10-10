@@ -7,11 +7,11 @@ import * as cores from '../../../styles/cores';
 import { useAuth } from '../context/AuthContext';
 
 // Importar as telas
-import AboutScreen from '../screens/AboutScreen';
-import ExploreScreen from '../screens/ExploreScreen';
-import HomeScreen from '../screens/HomeScreen';
-import SeatsScreen from '../screens/SeatsScreen';
-import SignupScreen from '../screens/SignupScreen';
+import AboutScreen from '../screens/about';
+import ExploreScreen from '../screens/explore';
+import HomeScreen from '../screens/home';
+import SeatsScreen from '../screens/seats';
+import SignupScreen from '../screens/signup';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();

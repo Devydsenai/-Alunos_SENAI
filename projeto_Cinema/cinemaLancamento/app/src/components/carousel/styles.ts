@@ -32,22 +32,17 @@ export const ViewAllText = styled.Text`
 
 export const CarouselContainer = styled.View`
   position: relative;
-  height: 260px;
+  height: 320px;
 `;
 
 export const ArrowButton = styled.TouchableOpacity`
   position: absolute;
-  top: 50%;
-  transform: translateY(-25px);
-  width: 50px;
-  height: 50px;
-  background-color: ${cores.pretoTransparente80};
-  border-radius: 25px;
+  top: 130px;
+  width: 60px;
+  height: 60px;
   justify-content: center;
   align-items: center;
   z-index: 10;
-  border-width: 2px;
-  border-color: ${cores.vermelhoPrimario};
 `;
 
 export const ArrowIcon = styled.Text`
@@ -66,10 +61,10 @@ export const IndicatorsContainer = styled.View`
 `;
 
 export const Indicator = styled.View<{ active: boolean }>`
-  width: ${props => props.active ? '24px' : '8px'};
+  width: ${(props: { active: boolean }) => props.active ? '24px' : '8px'};
   height: 8px;
   border-radius: 4px;
-  background-color: ${props => 
+  background-color: ${(props: { active: boolean }) => 
     props.active ? cores.vermelhoPrimario : cores.cinzaBorda
   };
 `;
