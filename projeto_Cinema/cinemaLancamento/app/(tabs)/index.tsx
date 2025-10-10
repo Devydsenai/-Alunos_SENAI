@@ -1,25 +1,21 @@
 import { useRouter } from 'expo-router';
+import { useVideoPlayer } from 'expo-video';
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Dimensions,
-  Image,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
-  TouchableOpacity,
   View
 } from "react-native";
-import { WebView } from 'react-native-webview';
-import { api, Filme } from '../services/api';
-
-const { width: screenWidth } = Dimensions.get('window');
+import { MovieCard, SearchBar, VideoPlayer } from '../../components';
+import { tmdb, TMDBFilme } from '../services/tmdb';
 
 // Interface estendida para adicionar disponibilidade
-interface FilmeComSessao extends Filme {
+interface FilmeComSessao extends TMDBFilme {
   sessaoDisponivel: boolean;
   vagasDisponiveis: number;
+  generoNomes?: string; // Para armazenar os nomes dos gêneros
 }
 
 export default function Index() {
@@ -29,7 +25,16 @@ export default function Index() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedMovie, setSelectedMovie] = useState<FilmeComSessao | null>(null);
+  const [trailerUrl, setTrailerUrl] = useState<string>('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4');
+  const [loadingTrailer, setLoadingTrailer] = useState(false);
   const router = useRouter();
+
+  // Player de vídeo
+  const player = useVideoPlayer(trailerUrl, player => {
+    player.loop = true;
+    player.muted = false;
+    player.volume = 0.7;
+  });
 
   useEffect(() => {
     carregarFilmes();
@@ -41,139 +46,132 @@ export default function Index() {
       setFilmesFiltrados(todosFilmes);
     } else {
       const filtrados = todosFilmes.filter(filme => 
-        filme.Title.toLowerCase().includes(searchText.toLowerCase()) ||
-        filme.Genre.toLowerCase().includes(searchText.toLowerCase()) ||
-        filme.Director.toLowerCase().includes(searchText.toLowerCase())
+        filme.title.toLowerCase().includes(searchText.toLowerCase()) ||
+        filme.original_title.toLowerCase().includes(searchText.toLowerCase()) ||
+        filme.overview.toLowerCase().includes(searchText.toLowerCase()) ||
+        (filme.generoNomes && filme.generoNomes.toLowerCase().includes(searchText.toLowerCase()))
       );
       setFilmesFiltrados(filtrados);
     }
   }, [searchText, todosFilmes]);
+
+  // Atualizar o player quando a URL do trailer mudar
+  useEffect(() => {
+    if (trailerUrl) {
+      player.replace(trailerUrl);
+    }
+  }, [trailerUrl]);
+
+  // Carregar trailer do primeiro filme ao iniciar
+  useEffect(() => {
+    if (todosFilmes.length > 0 && !selectedMovie) {
+      carregarTrailer(todosFilmes[0]);
+    }
+  }, [todosFilmes]);
+
+  const carregarTrailer = async (filme: FilmeComSessao) => {
+    try {
+      setLoadingTrailer(true);
+      setSelectedMovie(filme);
+      
+      const trailerKey = await tmdb.getTrailerURL(filme.id);
+      
+      if (trailerKey) {
+        // Converter URL do YouTube para formato de vídeo direto
+        // Usar um serviço ou fallback para vídeo padrão
+        setTrailerUrl('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4');
+      }
+    } catch (err) {
+      console.error('Erro ao carregar trailer:', err);
+    } finally {
+      setLoadingTrailer(false);
+    }
+  };
 
   const carregarFilmes = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Carregar todos os filmes da API
-      const filmes = await api.getFilmes({ limit: 100 });
+      // Mapeamento de IDs de gêneros para nomes em português
+      const generos: Record<number, string> = {
+        28: 'Ação',
+        12: 'Aventura',
+        16: 'Animação',
+        35: 'Comédia',
+        80: 'Crime',
+        99: 'Documentário',
+        18: 'Drama',
+        10751: 'Família',
+        14: 'Fantasia',
+        36: 'História',
+        27: 'Terror',
+        10402: 'Música',
+        9648: 'Mistério',
+        10749: 'Romance',
+        878: 'Ficção Científica',
+        10770: 'Cinema TV',
+        53: 'Suspense',
+        10752: 'Guerra',
+        37: 'Faroeste',
+      };
+
+      // Carregar filmes do TMDB - combinando populares e em cartaz
+      const [popularResponse, nowPlayingResponse] = await Promise.all([
+        tmdb.getPopularMovies(1),
+        tmdb.getNowPlayingMovies(1),
+      ]);
+      
+      // Combinar e remover duplicatas
+      const filmesUnicos = new Map<number, TMDBFilme>();
+      
+      [...popularResponse.results, ...nowPlayingResponse.results].forEach(filme => {
+        if (!filmesUnicos.has(filme.id)) {
+          filmesUnicos.set(filme.id, filme);
+        }
+      });
       
       // Adicionar informações de sessão aos filmes
-      const filmesComSessao: FilmeComSessao[] = filmes.map(filme => {
+      const filmesComSessao: FilmeComSessao[] = Array.from(filmesUnicos.values()).map(filme => {
         const sessaoDisponivel = Math.random() > 0.2; // 80% de chance de estar disponível
         const vagasDisponiveis = sessaoDisponivel 
           ? Math.floor(Math.random() * 80) + 20 // Entre 20 e 100 vagas
           : 0;
         
+        // Mapear os IDs de gêneros para nomes
+        const generoNomes = filme.genre_ids
+          .map(id => generos[id] || 'Outro')
+          .join(', ');
+        
         return {
           ...filme,
           sessaoDisponivel,
-          vagasDisponiveis
+          vagasDisponiveis,
+          generoNomes,
         };
       });
       
       setTodosFilmes(filmesComSessao);
       setFilmesFiltrados(filmesComSessao);
     } catch (err) {
-      console.error('Erro ao carregar filmes da API:', err);
-      setError('Não foi possível conectar à API.');
+      console.error('Erro ao carregar filmes do TMDB:', err);
+      setError('Não foi possível conectar ao TMDB. Verifique sua conexão.');
     } finally {
       setLoading(false);
     }
   };
 
-  const renderFilmeItem = ({ item }: { item: FilmeComSessao }) => {
-    return (
-      <View style={styles.filmeContainer}>
-        <View style={styles.filmeItem}>
-          <Image 
-            source={{ uri: item.Poster }} 
-            style={styles.filmePoster}
-            resizeMode="cover"
-            defaultSource={require('../../assets/images/icon.png')}
-            onError={() => {
-              console.log('Erro ao carregar imagem:', item.Title);
-            }}
-          />
-          <View style={styles.filmeInfo}>
-            <Text style={styles.filmeTitle} numberOfLines={2}>{item.Title}</Text>
-            <Text style={styles.filmeYear}>{item.Year} • {item.Runtime}</Text>
-            <Text style={styles.filmeGenre}>{item.Genre}</Text>
-            <View style={styles.filmeFooter}>
-              <Text style={styles.filmeRating}>⭐ {item.imdbRating}</Text>
-              {item.ComingSoon && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>EM BREVE</Text>
-                </View>
-              )}
-            </View>
-            
-            {/* Botão Escolher Poltronas no lugar da avaliação */}
-            {!item.ComingSoon && (
-              <TouchableOpacity 
-                style={[
-                  styles.seatsButtonCompact,
-                  !item.sessaoDisponivel && styles.seatsButtonDisabled
-                ]}
-                onPress={() => {
-                  if (item.sessaoDisponivel) {
-                    router.push({
-                      pathname: '/(tabs)/seats',
-                      params: { 
-                        filmeId: item.codigo,
-                        filmeTitulo: item.Title,
-                        vagasDisponiveis: item.vagasDisponiveis
-                      }
-                    } as any);
-                  }
-                }}
-                disabled={!item.sessaoDisponivel}
-              >
-                <Text style={styles.seatsButtonText}>
-                  {item.sessaoDisponivel ? '🎟️ Escolher Poltronas' : '🚫 Indisponível'}
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-      </View>
-    );
+  const handleSeatsPress = (filmeId: number, filmeTitulo: string, vagasDisponiveis: number) => {
+    router.push({
+      pathname: '/(tabs)/seats',
+      params: { 
+        filmeId,
+        filmeTitulo,
+        vagasDisponiveis
+      }
+    } as any);
   };
 
-  const renderYouTubePlayer = () => {
-    // Sempre mostrar o trailer do Avatar
-    const avatarVideoId = '5PSNL1qE6VY'; // Trailer oficial do Avatar
-    const embedUrl = `https://www.youtube.com/embed/${avatarVideoId}?autoplay=0&rel=0&modestbranding=1&showinfo=0&controls=1&fs=1`;
-
-    return (
-      <View style={styles.videoContainer}>
-        <Text style={styles.videoTitle}>Avatar</Text>
-        <Text style={styles.videoSubtitle}>Trailer Oficial</Text>
-        
-        {/* WebView com o trailer do Avatar */}
-        <View style={styles.youtubeContainer}>
-          <WebView
-            source={{ uri: embedUrl }}
-            style={styles.webview}
-            allowsFullscreenVideo={true}
-            mediaPlaybackRequiresUserAction={false}
-            startInLoadingState={true}
-            renderLoading={() => (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#E50914" />
-                <Text style={styles.videoLoadingText}>Carregando trailer...</Text>
-              </View>
-            )}
-          />
-        </View>
-        
-        <View style={styles.videoInfo}>
-          <Text style={styles.videoYear}>2009 • 162 min</Text>
-          <Text style={styles.videoGenre}>Action, Adventure, Fantasy</Text>
-          <Text style={styles.videoRating}>⭐ 7.9</Text>
-        </View>
-      </View>
-    );
-  };
 
 
   if (loading) {
@@ -192,28 +190,11 @@ export default function Index() {
         <Text style={styles.headerTitle}>🔍 Pesquisar Filmes</Text>
         
         {/* Barra de pesquisa */}
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Buscar por título, gênero ou diretor..."
-            placeholderTextColor="#999"
-            value={searchText}
-            onChangeText={setSearchText}
-          />
-          {searchText.length > 0 && (
-            <TouchableOpacity 
-              style={styles.clearButton}
-              onPress={() => setSearchText('')}
-            >
-              <Text style={styles.clearButtonText}>✕</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {/* Informações da busca */}
-        <Text style={styles.resultCount}>
-          {filmesFiltrados.length} {filmesFiltrados.length === 1 ? 'filme encontrado' : 'filmes encontrados'}
-        </Text>
+        <SearchBar 
+          value={searchText}
+          onChangeText={setSearchText}
+          resultCount={filmesFiltrados.length}
+        />
 
         {error && (
           <View style={styles.errorBanner}>
@@ -231,7 +212,15 @@ export default function Index() {
         >
           <View style={styles.resultsGrid}>
             {filmesFiltrados.length > 0 ? (
-              filmesFiltrados.map((item) => renderFilmeItem({ item }))
+              filmesFiltrados.map((item) => (
+                <MovieCard
+                  key={item.id}
+                  filme={item}
+                  isSelected={selectedMovie?.id === item.id}
+                  onPress={() => carregarTrailer(item)}
+                  onSeatsPress={handleSeatsPress}
+                />
+              ))
             ) : (
               <View style={styles.emptyContainer}>
                 <Text style={styles.emptyText}>🎬</Text>
@@ -244,9 +233,13 @@ export default function Index() {
           </View>
         </ScrollView>
         
-        {/* Coluna do Vídeo */}
+        {/* Coluna do Player de Vídeo */}
         <View style={styles.videoSection}>
-          {renderYouTubePlayer()}
+          <VideoPlayer 
+            player={player}
+            selectedMovie={selectedMovie}
+            loading={loadingTrailer}
+          />
         </View>
       </View>
     </View>
@@ -277,35 +270,8 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#E5091",
+    color: "#E50914",
     marginBottom: 15,
-  },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#2a2a2a",
-    borderRadius: 12,
-    paddingHorizontal: 15,
-    marginBottom: 10,
-  },
-  searchInput: {
-    flex: 1,
-    height: 50,
-    color: "#fff",
-    fontSize: 16,
-  },
-  clearButton: {
-    padding: 10,
-  },
-  clearButtonText: {
-    color: "#999",
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  resultCount: {
-    fontSize: 14,
-    color: "#999",
-    marginTop: 5,
   },
   errorBanner: {
     backgroundColor: "rgba(255, 152, 0, 0.2)",
@@ -323,89 +289,22 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     flexDirection: 'row',
-    alignItems: 'flex-start',
   },
   cardsContainer: {
     flex: 1,
-    padding: 12,
+    padding: 15,
     backgroundColor: '#141414',
   },
   videoSection: {
-    width: 180, // Mesmo tamanho dos cards
-    padding: 12,
+    width: 350,
+    padding: 15,
     backgroundColor: '#1a1a1a',
     borderLeftWidth: 1,
     borderLeftColor: '#333',
-    marginLeft: 10,
   },
   resultsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-start',
-  },
-  filmeContainer: {
-    width: 160, // Largura reduzida para caber na coluna
-    marginRight: 10,
-    marginBottom: 15,
-    backgroundColor: "#2a2a2a",
-    borderRadius: 12,
-    overflow: "hidden",
-    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)",
-    elevation: 8,
-  },
-  selectedCard: {
-    borderWidth: 2,
-    borderColor: "#E50914",
-  },
-  filmeItem: {
-    flexDirection: "column", // Mudança para layout vertical
-    backgroundColor: "#2a2a2a",
-  },
-  filmePoster: {
-    width: "100%",
-    height: 240,
-  },
-  filmeInfo: {
-    padding: 12,
-    justifyContent: "space-between",
-    minHeight: 70,
-  },
-  filmeTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 4,
-  },
-  filmeYear: {
-    fontSize: 14,
-    color: "#E50914",
-    marginBottom: 4,
-  },
-  filmeGenre: {
-    fontSize: 12,
-    color: "#999",
-    marginBottom: 8,
-  },
-  filmeFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  filmeRating: {
-    fontSize: 14,
-    color: "#ffd700",
-    fontWeight: "bold",
-  },
-  badge: {
-    backgroundColor: "#E50914",
-    paddingHorizontal: 4,
-    paddingVertical: 1,
-    borderRadius: 2,
-  },
-  badgeText: {
-    fontSize: 6,
-    color: "#fff",
-    fontWeight: "bold",
+    flexDirection: 'column',
+    gap: 15,
   },
   emptyContainer: {
     alignItems: "center",
@@ -425,149 +324,6 @@ const styles = StyleSheet.create({
   emptySubtitle: {
     fontSize: 14,
     color: "#999",
-  },
-  seatsContainer: {
-    padding: 15,
-    backgroundColor: "#1f1f1f",
-    borderTopWidth: 1,
-    borderTopColor: "#333",
-  },
-  seatsInfo: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  seatsTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#fff",
-  },
-  statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  statusAvailable: {
-    backgroundColor: "rgba(0, 255, 0, 0.2)",
-    borderWidth: 1,
-    borderColor: "#00ff00",
-  },
-  statusFull: {
-    backgroundColor: "rgba(229, 9, 20, 0.2)",
-    borderWidth: 1,
-    borderColor: "#E50914",
-  },
-  statusText: {
-    fontSize: 8,
-    fontWeight: "bold",
-    color: "#fff",
-  },
-  seatsButtonCompact: {
-    backgroundColor: "#E50914",
-    padding: 8,
-    borderRadius: 6,
-    alignItems: "center",
-    marginTop: 6,
-    width: "100%",
-  },
-  seatsButton: {
-    backgroundColor: "#E50914",
-    padding: 4,
-    borderRadius: 4,
-    alignItems: "center",
-    marginTop: 2,
-  },
-  seatsButtonDisabled: {
-    backgroundColor: "#555",
-  },
-  seatsButtonText: {
-    color: "#fff",
-    fontSize: 10,
-    fontWeight: "bold",
-  },
-  videoPlaceholder: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#1a1a1a',
-  },
-  placeholderText: {
-    fontSize: 48,
-    marginBottom: 16,
-  },
-  placeholderTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 8,
-  },
-  placeholderSubtitle: {
-    fontSize: 14,
-    color: '#999',
-  },
-  placeholderHint: {
-    fontSize: 12,
-    color: '#E50914',
-    marginTop: 16,
-    textAlign: 'center',
-    fontStyle: 'italic',
-  },
-  videoContainer: {
-    width: '100%',
-  },
-  videoTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 2,
-  },
-  videoSubtitle: {
-    fontSize: 12,
-    color: '#E50914',
-    marginBottom: 12,
-  },
-  youtubeContainer: {
-    width: '100%',
-    height: 240, // Mesma altura dos posters dos cards
-    backgroundColor: '#000',
-    borderRadius: 8,
-    marginBottom: 16,
-    overflow: 'hidden',
-  },
-  webview: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#000',
-  },
-  videoLoadingText: {
-    color: '#fff',
-    marginTop: 10,
-    fontSize: 14,
-  },
-  videoInfo: {
-    padding: 8,
-    backgroundColor: '#2a2a2a',
-    borderRadius: 8,
-  },
-  videoYear: {
-    fontSize: 14,
-    color: '#E50914',
-    marginBottom: 4,
-  },
-  videoGenre: {
-    fontSize: 12,
-    color: '#999',
-    marginBottom: 4,
-  },
-  videoRating: {
-    fontSize: 14,
-    color: '#ffd700',
-    fontWeight: 'bold',
   },
 });
 
