@@ -193,3 +193,5 @@ optionButtonSelected: {
 7. ✅ Layout responsivo
 
 **🎬 Sistema de pagamento 100% funcional e profissional!**
+
+

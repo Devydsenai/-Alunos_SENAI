@@ -238,3 +238,5 @@ Response:
 
 **REINICIE A API (duplo clique em `INICIAR_API_AGORA.bat`) e teste!** 🚀✨
 
+
+

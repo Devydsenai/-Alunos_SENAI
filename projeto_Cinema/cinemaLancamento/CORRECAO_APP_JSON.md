@@ -47,3 +47,5 @@ O Expo agora deve iniciar sem erros e o formulário de pagamento deve funcionar 
 - 🎫 Geração de PDF simulada
 
 **Aguarde o Expo carregar e teste o formulário!** 🎉
+
+

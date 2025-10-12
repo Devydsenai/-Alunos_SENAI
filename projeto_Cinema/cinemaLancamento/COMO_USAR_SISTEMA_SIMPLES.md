@@ -237,3 +237,5 @@ Se algo não funcionar:
 3. Verifique se a porta 3000 está livre
 4. Leia a seção "Problemas Comuns" acima
 
+
+

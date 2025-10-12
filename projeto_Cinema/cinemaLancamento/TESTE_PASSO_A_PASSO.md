@@ -188,3 +188,5 @@
 
 Siga os passos acima com o **console aberto** para ver todos os logs e entender o que está acontecendo! 🎯✨
 
+
+

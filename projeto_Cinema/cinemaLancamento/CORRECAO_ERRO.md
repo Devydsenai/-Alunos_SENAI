@@ -84,3 +84,5 @@ import * as cores from '../../../../styles/cores';
 - 🚀 **Funcionalidades** funcionando
 
 **Agora deve funcionar perfeitamente!** 🎬✨
+
+

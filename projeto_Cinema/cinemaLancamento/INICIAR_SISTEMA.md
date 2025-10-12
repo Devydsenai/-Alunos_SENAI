@@ -87,3 +87,5 @@ Deve mostrar as reservas!
 - ✅ `app/src/services/poltronas.ts` - Serviço frontend
 - ✅ `SISTEMA_POLTRONAS_COMPLETO.md` - Documentação completa
 
+
+

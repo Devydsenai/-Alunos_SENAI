@@ -120,3 +120,5 @@ O formulário agora deve funcionar 100% com todas as funcionalidades implementad
 - 🎫 **Geração de PDF** simulada
 
 **Aguarde o Expo carregar e teste!** 🚀
+
+

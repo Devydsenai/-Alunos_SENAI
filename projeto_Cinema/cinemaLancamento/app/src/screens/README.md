@@ -57,3 +57,5 @@ import AboutScreen from '../screens/about';
 - ✅ **Manutenção**: Localização rápida de arquivos
 - ✅ **Clareza**: Estrutura profissional e intuitiva
 
+
+
