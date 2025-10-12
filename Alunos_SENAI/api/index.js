@@ -1,6 +1,6 @@
 // index.js
 // API REST em Node.js (único arquivo) usando Express + Sequelize (SQLite) + CORS aberto
-// Campos do cliente: codigo (PK, inteiro autoincrement), nome, email, telefone, ativo (boolean)
+// Campos do cliente: codigo (PK, inteiro autoincrement), nome, email, telefone, ativo (boolean), foto (text)
 
 const express = require('express');
 const { Sequelize, DataTypes } = require('sequelize');
@@ -15,7 +15,6 @@ const sequelize = new Sequelize({
   dialect: 'sqlite',
   storage: './database.sqlite',
   logging: false,
-  force: true, // Força recriação do banco
 });
 
 // Modelo Cliente
@@ -45,6 +44,10 @@ const Cliente = sequelize.define('Cliente', {
     allowNull: false,
     defaultValue: true,
   },
+  foto: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
 }, {
   tableName: 'clientes',
   timestamps: true,
@@ -54,7 +57,7 @@ const Cliente = sequelize.define('Cliente', {
 async function start() {
   try {
     await sequelize.authenticate();
-    await sequelize.sync({ force: true }); // Força recriação das tabelas
+    await sequelize.sync({ alter: true }); // Atualiza tabelas sem apagar dados
     console.log('Banco conectado e modelos sincronizados.');
 
     // Rotas
@@ -96,8 +99,8 @@ async function start() {
     // Criar cliente
     app.post('/clientes', async (req, res) => {
       try {
-        const { nome, email, telefone, ativo } = req.body;
-        const novo = await Cliente.create({ nome, email, telefone, ativo });
+        const { nome, email, telefone, ativo, foto } = req.body;
+        const novo = await Cliente.create({ nome, email, telefone, ativo, foto });
         res.status(201).json(novo);
       } catch (err) {
         console.error(err);
@@ -116,8 +119,8 @@ async function start() {
       try {
         const cliente = await Cliente.findByPk(req.params.codigo);
         if (!cliente) return res.status(404).json({ error: 'Cliente não encontrado' });
-        const { nome, email, telefone, ativo } = req.body;
-        await cliente.update({ nome, email, telefone, ativo });
+        const { nome, email, telefone, ativo, foto } = req.body;
+        await cliente.update({ nome, email, telefone, ativo, foto });
         res.json(cliente);
       } catch (err) {
         console.error(err);
@@ -192,7 +195,7 @@ Instruções rápidas:
    - GET / -> health
    - GET /clientes -> lista
    - GET /clientes/:codigo -> obter
-   - POST /clientes {nome,email,telefone,ativo} -> criar
+   - POST /clientes {nome,email,telefone,ativo,foto} -> criar
    - PUT /clientes/:codigo -> atualizar (substitui campos enviados)
    - PATCH /clientes/:codigo -> atualizar parcialmente
    - DELETE /clientes/:codigo -> remover

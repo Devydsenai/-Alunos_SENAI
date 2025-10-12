@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, TextInput, Modal, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { Alert, FlatList, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 // Interface para o cliente
 interface Cliente {
@@ -9,6 +10,7 @@ interface Cliente {
   email: string;
   telefone: string;
   ativo: boolean;
+  foto?: string;
 }
 
 export default function AboutScreen() {
@@ -22,7 +24,8 @@ export default function AboutScreen() {
     nome: '',
     email: '',
     telefone: '',
-    ativo: true
+    ativo: true,
+    foto: ''
   });
 
   // URL da API (ajuste conforme necessário)
@@ -89,7 +92,7 @@ export default function AboutScreen() {
       if (response.ok) {
         const successMessage = isEditando ? 'Cliente editado com sucesso!' : 'Cliente adicionado com sucesso!';
         Alert.alert('Sucesso', successMessage);
-        setNovoCliente({ nome: '', email: '', telefone: '', ativo: true });
+        setNovoCliente({ nome: '', email: '', telefone: '', ativo: true, foto: '' });
         setClienteEditando(null);
         setModalVisible(false);
         buscarClientes();
@@ -194,7 +197,8 @@ export default function AboutScreen() {
           nome: cliente.nome,
           email: cliente.email,
           telefone: cliente.telefone || '',
-          ativo: cliente.ativo
+          ativo: cliente.ativo,
+          foto: cliente.foto || ''
         });
         setModalVisible(true);
         
@@ -227,6 +231,13 @@ export default function AboutScreen() {
   const renderCliente = ({ item }: { item: Cliente }) => (
     <View style={[styles.clienteCard, !item.ativo && styles.clienteInativo]}>
       <View style={styles.clienteHeader}>
+        {item.foto ? (
+          <Image source={{ uri: item.foto }} style={styles.clienteFoto} />
+        ) : (
+          <View style={styles.clienteSemFoto}>
+            <Ionicons name="person" size={100} color="#ccc" />
+          </View>
+        )}
         <View style={styles.clienteInfo}>
           <Text style={[styles.clienteNome, !item.ativo && styles.textoInativo]}>{item.nome}</Text>
           <Text style={[styles.clienteEmail, !item.ativo && styles.textoInativo]}>{item.email}</Text>
@@ -244,21 +255,24 @@ export default function AboutScreen() {
           style={styles.botaoEditar}
           onPress={() => editarCliente(item.codigo)}
         >
-          <Text style={styles.botaoTexto}>✏️ Editar</Text>
+          <Ionicons name="pencil" size={12} color="#fff" />
+          <Text style={styles.botaoTexto}>Editar</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
           style={[styles.botaoStatus, { backgroundColor: item.ativo ? '#FF9800' : '#4CAF50' }]}
           onPress={() => alternarStatusCliente(item.codigo, item.ativo)}
         >
-          <Text style={styles.botaoTexto}>{item.ativo ? '⏸️ Desativar' : '▶️ Ativar'}</Text>
+          <Ionicons name={item.ativo ? "pause" : "play"} size={12} color="#fff" />
+          <Text style={styles.botaoTexto}>{item.ativo ? 'Desativar' : 'Ativar'}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
           style={styles.botaoTeste}
           onPress={() => excluirCliente(item.codigo, item.nome)}
         >
-          <Text style={styles.botaoTexto}>🗑️ Deletar</Text>
+          <Ionicons name="trash" size={12} color="#fff" />
+          <Text style={styles.botaoTexto}>Deletar</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -368,7 +382,7 @@ export default function AboutScreen() {
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => {
                   setModalVisible(false);
-                  setNovoCliente({ nome: '', email: '', telefone: '', ativo: true });
+                  setNovoCliente({ nome: '', email: '', telefone: '', ativo: true, foto: '' });
                   setClienteEditando(null);
                 }}
               >
@@ -483,18 +497,18 @@ const styles = StyleSheet.create({
   },
   clienteCard: {
     backgroundColor: '#fff',
-    padding: 12,
-    marginBottom: 8,
+    padding: 15,
+    marginBottom: 15,
     marginHorizontal: 10,
-    borderRadius: 8,
+    borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 1,
+      height: 2,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 3,
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 5,
   },
   clienteInativo: {
     backgroundColor: '#f5f5f5',
@@ -507,7 +521,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 8,
+    marginBottom: 15,
+  },
+  clienteFoto: {
+    width: 200,
+    height: 200,
+    borderRadius: 8,
+    marginRight: 10,
+    borderWidth: 2,
+    borderColor: '#4CAF50',
+  },
+  clienteSemFoto: {
+    width: 200,
+    height: 200,
+    borderRadius: 8,
+    marginRight: 10,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   clienteInfo: {
     flex: 1,
@@ -542,7 +573,7 @@ const styles = StyleSheet.create({
   botoesContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginTop: 4,
+    marginTop: 150,
     gap: 2,
   },
   botaoEditar: {
@@ -552,8 +583,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     minWidth: 40,
     height: 22,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    gap: 3,
   },
   botaoStatus: {
     paddingHorizontal: 6,
@@ -561,8 +594,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     minWidth: 40,
     height: 22,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    gap: 3,
   },
   botaoTeste: {
     backgroundColor: '#F44336',
@@ -571,8 +606,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     minWidth: 40,
     height: 22,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    gap: 3,
   },
   botaoTexto: {
     color: '#fff',

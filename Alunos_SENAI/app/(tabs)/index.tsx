@@ -1,6 +1,8 @@
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert, FlatList } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { Link, useRouter } from 'expo-router';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 // Interface para o cliente
 interface Cliente {
@@ -9,6 +11,7 @@ interface Cliente {
   email: string;
   telefone: string;
   ativo: boolean;
+  foto?: string;
 }
 
 export default function HomeScreen() {
@@ -22,7 +25,8 @@ export default function HomeScreen() {
     nome: '',
     email: '',
     telefone: '',
-    ativo: true
+    ativo: true,
+    foto: ''
   });
   const router = useRouter();
 
@@ -66,6 +70,67 @@ export default function HomeScreen() {
     }
   };
 
+  // Função para tirar foto
+  const tirarFoto = async () => {
+    try {
+      // Pedir permissão para usar a câmera
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert('Permissão Negada', 'Precisamos de permissão para acessar a câmera');
+        return;
+      }
+
+      // Abrir câmera
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [3, 4],
+        quality: 0.5,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setNovoCliente({...novoCliente, foto: result.assets[0].uri});
+      }
+    } catch (error) {
+      console.error('Erro ao tirar foto:', error);
+      Alert.alert('Erro', 'Não foi possível tirar a foto');
+    }
+  };
+
+  // Função para selecionar imagem da galeria
+  const selecionarImagem = async () => {
+    try {
+      // Pedir permissão para acessar a galeria
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert('Permissão Negada', 'Precisamos de permissão para acessar a galeria');
+        return;
+      }
+
+      // Abrir galeria
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [3, 4],
+        quality: 0.5,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setNovoCliente({...novoCliente, foto: result.assets[0].uri});
+      }
+    } catch (error) {
+      console.error('Erro ao selecionar imagem:', error);
+      Alert.alert('Erro', 'Não foi possível selecionar a imagem');
+    }
+  };
+
+  // Função para remover foto
+  const removerFoto = () => {
+    setNovoCliente({...novoCliente, foto: ''});
+  };
+
   // Função para selecionar um cliente da sugestão
   const selecionarCliente = (cliente: Cliente) => {
     setPesquisa(cliente.nome);
@@ -91,7 +156,7 @@ export default function HomeScreen() {
 
       if (response.ok) {
         // Limpar campos imediatamente após sucesso
-        setNovoCliente({ nome: '', email: '', telefone: '', ativo: true });
+        setNovoCliente({ nome: '', email: '', telefone: '', ativo: true, foto: '' });
         
         // Recarregar lista de clientes
         await buscarClientes();
@@ -178,6 +243,44 @@ export default function HomeScreen() {
         {/* Formulário de Criação */}
         <View style={styles.formContainer}>
           <Text style={styles.formTitle}>Dados do Cliente</Text>
+          
+          {/* Seção de Foto */}
+          <View style={styles.fotoContainer}>
+            {novoCliente.foto ? (
+              <View style={styles.fotoPreviewContainer}>
+                <Image source={{ uri: novoCliente.foto }} style={styles.fotoPreview} />
+                <TouchableOpacity 
+                  style={styles.botaoRemoverFoto}
+                  onPress={removerFoto}
+                >
+                  <Ionicons name="close-circle" size={30} color="#F44336" />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.semFoto}>
+                <Ionicons name="person-circle-outline" size={80} color="#ccc" />
+                <Text style={styles.semFotoTexto}>Sem foto</Text>
+              </View>
+            )}
+            
+            <View style={styles.botoesContainer}>
+              <TouchableOpacity 
+                style={styles.botaoFoto}
+                onPress={tirarFoto}
+              >
+                <Ionicons name="camera" size={20} color="#fff" />
+                <Text style={styles.botaoFotoTexto}>Tirar Foto</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.botaoGaleria}
+                onPress={selecionarImagem}
+              >
+                <Ionicons name="images" size={20} color="#fff" />
+                <Text style={styles.botaoFotoTexto}>Galeria</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
           
           <TextInput
             style={styles.input}
@@ -434,5 +537,67 @@ const styles = StyleSheet.create({
   },
   textoInativo: {
     color: '#999',
+  },
+  // Estilos para foto
+  fotoContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  fotoPreviewContainer: {
+    position: 'relative',
+    marginBottom: 15,
+  },
+  fotoPreview: {
+    width: 90,
+    height: 120,
+    borderRadius: 10,
+    borderWidth: 3,
+    borderColor: '#4CAF50',
+  },
+  botaoRemoverFoto: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: '#fff',
+    borderRadius: 15,
+  },
+  semFoto: {
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  semFotoTexto: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 5,
+  },
+  botoesContainer: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  botaoFoto: {
+    backgroundColor: '#2196F3',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    gap: 8,
+  },
+  botaoGaleria: {
+    backgroundColor: '#9C27B0',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    gap: 8,
+  },
+  botaoFotoTexto: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });

@@ -1,50 +1,45 @@
-# API REST - Sistema de Clientes SENAI
+# API de Clientes - SENAI
 
-Esta é uma API REST simples desenvolvida para alunos iniciantes do SENAI.
+API REST para gerenciar clientes com suporte a fotos 3x4.
 
-## Como usar
+## 🚀 Como rodar a API
 
-1. **Instalar dependências:**
-   ```bash
-   npm install
-   ```
+### Desenvolvimento (com auto-reload)
+```bash
+npm run dev
+```
+A API reinicia automaticamente quando você faz alterações no código!
 
-2. **Executar a API:**
-   ```bash
-   npm start
-   ```
+### Produção
+```bash
+npm start
+```
 
-3. **A API estará rodando em:** `http://localhost:3000`
+## 📦 Instalação
 
-## Endpoints disponíveis
+```bash
+npm install
+```
 
-- `GET /` - Health check (verificar se a API está funcionando)
+## 🔧 Funcionalidades
+
+- ✅ CRUD completo de clientes
+- ✅ Suporte para fotos 3x4
+- ✅ Validação de e-mail
+- ✅ Status ativo/inativo
+- ✅ Auto-reload em desenvolvimento
+
+## 📡 Endpoints
+
+- `GET /` - Health check
 - `GET /clientes` - Listar todos os clientes
 - `GET /clientes/:codigo` - Buscar cliente por código
 - `POST /clientes` - Criar novo cliente
 - `PUT /clientes/:codigo` - Atualizar cliente completo
-- `PATCH /clientes/:codigo` - Atualizar campos específicos do cliente
-- `DELETE /clientes/:codigo` - Excluir cliente
+- `PATCH /clientes/:codigo` - Atualizar campos específicos
+- `DELETE /clientes/:codigo` - Deletar cliente
 
-## Exemplo de uso
-
-### Criar um cliente:
-```bash
-curl -X POST http://localhost:3000/clientes \
-  -H "Content-Type: application/json" \
-  -d '{"nome":"João Silva","email":"joao@email.com","telefone":"11999999999","ativo":true}'
-```
-
-### Listar clientes:
-```bash
-curl http://localhost:3000/clientes
-```
-
-## Banco de dados
-
-A API usa SQLite como banco de dados. O arquivo `database.sqlite` será criado automaticamente quando você executar a API pela primeira vez.
-
-## Estrutura do Cliente
+## 📄 Estrutura do Cliente
 
 ```json
 {
@@ -52,6 +47,27 @@ A API usa SQLite como banco de dados. O arquivo `database.sqlite` será criado a
   "nome": "João Silva",
   "email": "joao@email.com",
   "telefone": "11999999999",
-  "ativo": true
+  "ativo": true,
+  "foto": "file:///path/to/photo.jpg"
 }
 ```
+
+## 🗄️ Banco de Dados
+
+- SQLite (arquivo `database.sqlite`)
+- Os dados são preservados entre reinicializações
+- Para resetar o banco, delete o arquivo `database.sqlite`
+
+## ⚙️ Configurações
+
+- Porta padrão: `3000`
+- CORS: habilitado para todas as origens
+- Auto-reload: ativado em modo `dev`
+
+## 🛠️ Tecnologias
+
+- Node.js
+- Express
+- Sequelize
+- SQLite3
+- Nodemon (desenvolvimento)
