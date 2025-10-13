@@ -3,7 +3,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { Alert, FlatList, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-// Interface para o cliente
+// Interface para o fornecedor
 interface Cliente {
   codigo: number;
   nome: string;
@@ -31,7 +31,7 @@ export default function AboutScreen() {
   // URL da API (ajuste conforme necessário)
   const API_URL = 'http://localhost:3000';
 
-  // Função para buscar clientes
+  // Função para buscar fornecedores
   const buscarClientes = async () => {
     try {
       setLoading(true);
@@ -51,7 +51,7 @@ export default function AboutScreen() {
     }
   };
 
-  // Função para filtrar clientes
+  // Função para filtrar fornecedores
   const filtrarClientes = (texto: string) => {
     setPesquisa(texto);
     if (texto.trim() === '') {
@@ -66,7 +66,7 @@ export default function AboutScreen() {
     }
   };
 
-  // Função para adicionar/editar cliente
+  // Função para adicionar/editar fornecedor
   const adicionarCliente = async () => {
     if (!novoCliente.nome || !novoCliente.email) {
       Alert.alert('Erro', 'Nome e email são obrigatórios');
@@ -90,7 +90,7 @@ export default function AboutScreen() {
       });
 
       if (response.ok) {
-        const successMessage = isEditando ? 'Cliente editado com sucesso!' : 'Cliente adicionado com sucesso!';
+        const successMessage = isEditando ? 'Fornecedor editado com sucesso!' : 'Fornecedor adicionado com sucesso!';
         Alert.alert('Sucesso', successMessage);
         setNovoCliente({ nome: '', email: '', telefone: '', ativo: true, foto: '' });
         setClienteEditando(null);
@@ -113,10 +113,10 @@ export default function AboutScreen() {
     }
   };
 
-  // Função para alternar status do cliente
+  // Função para alternar status do fornecedor
   const alternarStatusCliente = async (codigo: number, ativo: boolean) => {
     try {
-      console.log(`Alterando status do cliente ${codigo} de ${ativo} para ${!ativo}`);
+      console.log(`Alterando status do fornecedor ${codigo} de ${ativo} para ${!ativo}`);
       
       const response = await fetch(`${API_URL}/clientes/${codigo}`, {
         method: 'PATCH',
@@ -129,7 +129,7 @@ export default function AboutScreen() {
       console.log('Resposta da API:', response.status);
 
       if (response.ok) {
-        Alert.alert('Sucesso', `Cliente ${!ativo ? 'ativado' : 'desativado'} com sucesso!`);
+        Alert.alert('Sucesso', `Fornecedor ${!ativo ? 'ativado' : 'desativado'} com sucesso!`);
         buscarClientes();
       } else {
         const errorData = await response.json();
@@ -142,11 +142,11 @@ export default function AboutScreen() {
     }
   };
 
-  // Função para excluir cliente (usando a função que funciona)
+  // Função para excluir fornecedor (usando a função que funciona)
   const excluirCliente = async (codigo: number, nome: string) => {
     console.log('=== BOTÃO DELETAR CLICADO ===');
     console.log('API URL:', API_URL);
-    console.log('Cliente selecionado:', { codigo, nome });
+    console.log('Fornecedor selecionado:', { codigo, nome });
     
     try {
       console.log('1. Testando DELETE para cliente:', codigo);
@@ -167,7 +167,7 @@ export default function AboutScreen() {
       console.log('3. Resultado do DELETE:', deleteResult);
       
       if (deleteResponse.ok) {
-        Alert.alert('Sucesso!', `Cliente ${nome} (código: ${codigo}) foi deletado com sucesso!`);
+        Alert.alert('Sucesso!', `Fornecedor ${nome} (código: ${codigo}) foi deletado com sucesso!`);
         buscarClientes(); // Recarregar lista
       } else {
         Alert.alert('Erro no DELETE', `Status: ${deleteResponse.status}\nErro: ${deleteResult.error || 'Erro desconhecido'}`);
@@ -179,18 +179,18 @@ export default function AboutScreen() {
     }
   };
 
-  // Função para editar cliente
+  // Função para editar fornecedor
   const editarCliente = async (codigo: number) => {
     console.log('=== BOTÃO EDITAR CLICADO ===');
-    console.log('Código do cliente:', codigo);
+    console.log('Código do fornecedor:', codigo);
     
     try {
-      // Buscar dados do cliente
+      // Buscar dados do fornecedor
       const response = await fetch(`${API_URL}/clientes/${codigo}`);
       
       if (response.ok) {
         const cliente = await response.json();
-        console.log('Cliente encontrado:', cliente);
+        console.log('Fornecedor encontrado:', cliente);
         
         // Mostrar modal de edição
         setNovoCliente({
@@ -202,25 +202,25 @@ export default function AboutScreen() {
         });
         setModalVisible(true);
         
-        // Armazenar código do cliente para edição
+        // Armazenar código do fornecedor para edição
         setClienteEditando(codigo);
       } else {
-        Alert.alert('Erro', 'Cliente não encontrado');
+        Alert.alert('Erro', 'Fornecedor não encontrado');
       }
     } catch (error) {
-      console.error('Erro ao buscar cliente:', error);
-      Alert.alert('Erro', `Erro ao buscar cliente: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      console.error('Erro ao buscar fornecedor:', error);
+      Alert.alert('Erro', `Erro ao buscar fornecedor: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
     }
   };
 
 
 
-  // Carregar clientes quando a tela for montada
+  // Carregar fornecedores quando a tela for montada
   useEffect(() => {
     buscarClientes();
   }, []);
 
-  // Recarregar clientes sempre que a tela for focada (quando voltar de outras telas)
+  // Recarregar fornecedores sempre que a tela for focada (quando voltar de outras telas)
   useFocusEffect(
     React.useCallback(() => {
       buscarClientes();
@@ -281,7 +281,7 @@ export default function AboutScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Lista de Clientes</Text>
+        <Text style={styles.title}>Lista de Fornecedores</Text>
         <View style={styles.headerButtons}>
           <TouchableOpacity style={styles.botaoAdicionar} onPress={() => setModalVisible(true)}>
             <Text style={styles.botaoAdicionarTexto}>+ Adicionar</Text>
@@ -295,7 +295,7 @@ export default function AboutScreen() {
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Pesquisar clientes..."
+          placeholder="Pesquisar fornecedores..."
           value={pesquisa}
           onChangeText={filtrarClientes}
           placeholderTextColor="#999"
@@ -304,15 +304,15 @@ export default function AboutScreen() {
 
       {loading ? (
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Carregando clientes...</Text>
+          <Text style={styles.loadingText}>Carregando fornecedores...</Text>
         </View>
       ) : clientesFiltrados.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>
-            {pesquisa ? 'Nenhum cliente encontrado para a pesquisa' : 'Nenhum cliente encontrado'}
+            {pesquisa ? 'Nenhum fornecedor encontrado para a pesquisa' : 'Nenhum fornecedor encontrado'}
           </Text>
           <Text style={styles.emptySubtext}>
-            {pesquisa ? 'Tente uma pesquisa diferente' : 'Verifique se a API está rodando ou adicione alguns clientes'}
+            {pesquisa ? 'Tente uma pesquisa diferente' : 'Verifique se a API está rodando ou adicione alguns fornecedores'}
           </Text>
         </View>
       ) : (
@@ -335,7 +335,7 @@ export default function AboutScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>
-              {clienteEditando ? 'Editar Cliente' : 'Adicionar Novo Cliente'}
+              {clienteEditando ? 'Editar Fornecedor' : 'Adicionar Novo Fornecedor'}
             </Text>
             
             <ScrollView style={styles.modalForm}>
@@ -373,7 +373,7 @@ export default function AboutScreen() {
                 >
                   <Text style={styles.checkboxText}>✓</Text>
                 </TouchableOpacity>
-                <Text style={styles.checkboxLabel}>Cliente ativo</Text>
+                <Text style={styles.checkboxLabel}>Fornecedor ativo</Text>
               </View>
             </ScrollView>
             

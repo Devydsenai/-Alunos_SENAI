@@ -4,7 +4,7 @@ import { Link, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-// Interface para o cliente
+// Interface para o fornecedor
 interface Cliente {
   codigo: number;
   nome: string;
@@ -161,7 +161,7 @@ export default function HomeScreen() {
         // Recarregar lista de clientes
         await buscarClientes();
         
-        Alert.alert('Sucesso', 'Cliente criado com sucesso!');
+        Alert.alert('Sucesso', 'Fornecedor criado com sucesso!');
       } else {
         const error = await response.json();
         console.error('Erro da API:', error);
@@ -170,12 +170,12 @@ export default function HomeScreen() {
         if (error.error && error.error.includes('já cadastrado')) {
           Alert.alert('Erro', 'Este e-mail já está cadastrado. Use um e-mail diferente.');
         } else {
-          Alert.alert('Erro', error.error || 'Não foi possível criar o cliente');
+          Alert.alert('Erro', error.error || 'Não foi possível criar o fornecedor');
         }
       }
     } catch (error) {
-      Alert.alert('Erro', 'Erro ao criar cliente');
-      console.error('Erro ao criar cliente:', error);
+      Alert.alert('Erro', 'Erro ao criar fornecedor');
+      console.error('Erro ao criar fornecedor:', error);
     } finally {
       setLoading(false);
     }
@@ -190,14 +190,14 @@ export default function HomeScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>Sistema de Clientes SENAI</Text>
-        <Text style={styles.subtitle}>Criar Novo Cliente</Text>
+        <Text style={styles.title}>Sistema de Fornecedores SENAI</Text>
+        <Text style={styles.subtitle}>Criar Novo Fornecedor</Text>
         
         {/* Campo de Pesquisa */}
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Pesquisar clientes..."
+            placeholder="Pesquisar fornecedores..."
             value={pesquisa}
             onChangeText={filtrarClientes}
             onFocus={() => {
@@ -242,7 +242,7 @@ export default function HomeScreen() {
 
         {/* Formulário de Criação */}
         <View style={styles.formContainer}>
-          <Text style={styles.formTitle}>Dados do Cliente</Text>
+          <Text style={styles.formTitle}>Dados do Fornecedor</Text>
           
           {/* Seção de Foto */}
           <View style={styles.fotoContainer}>
@@ -284,7 +284,7 @@ export default function HomeScreen() {
           
           <TextInput
             style={styles.input}
-            placeholder="Nome do Cliente *"
+            placeholder="Nome do Fornecedor *"
             value={novoCliente.nome}
             onChangeText={(text) => setNovoCliente({...novoCliente, nome: text})}
             placeholderTextColor="#999"
@@ -292,7 +292,7 @@ export default function HomeScreen() {
           
           <TextInput
             style={styles.input}
-            placeholder="E-mail do Cliente *"
+            placeholder="E-mail do Fornecedor *"
             value={novoCliente.email}
             onChangeText={(text) => setNovoCliente({...novoCliente, email: text})}
             keyboardType="email-address"
@@ -302,7 +302,7 @@ export default function HomeScreen() {
           
           <TextInput
             style={styles.input}
-            placeholder="Telefone do Cliente"
+            placeholder="Telefone do Fornecedor"
             value={novoCliente.telefone}
             onChangeText={(text) => setNovoCliente({...novoCliente, telefone: text})}
             keyboardType="phone-pad"
@@ -316,7 +316,7 @@ export default function HomeScreen() {
             >
               <Text style={styles.checkboxText}>✓</Text>
             </TouchableOpacity>
-            <Text style={styles.checkboxLabel}>Cliente ativo</Text>
+            <Text style={styles.checkboxLabel}>Fornecedor ativo</Text>
           </View>
           
           <TouchableOpacity
@@ -325,16 +325,16 @@ export default function HomeScreen() {
             disabled={loading}
           >
             <Text style={styles.createButtonText}>
-              {loading ? 'Criando...' : 'Criar Cliente'}
+              {loading ? 'Criando...' : 'Criar Fornecedor'}
             </Text>
           </TouchableOpacity>
         </View>
 
 
-        {/* Link para ver clientes */}
+        {/* Link para ver fornecedores */}
         <View style={styles.linkContainer}>
           <Link href="/(tabs)/about" style={styles.linkButton}>
-            <Text style={styles.linkText}>Ver Lista Completa de Clientes</Text>
+            <Text style={styles.linkText}>Ver Lista Completa de Fornecedores</Text>
           </Link>
         </View>
       </View>
