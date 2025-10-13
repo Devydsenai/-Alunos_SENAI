@@ -190,7 +190,7 @@ export default function HomeScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>Sistema de Fornecedores SENAI</Text>
+        <Text style={styles.title}>Sistema de Fornecedores </Text>
         <Text style={styles.subtitle}>Criar Novo Fornecedor</Text>
         
         {/* Campo de Pesquisa */}
