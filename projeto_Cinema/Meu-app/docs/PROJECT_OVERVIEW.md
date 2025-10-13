@@ -341,3 +341,4 @@ A aplicação demonstra:
 
 *Desenvolvido com ❤️ e React Native no SENAI*
 
+

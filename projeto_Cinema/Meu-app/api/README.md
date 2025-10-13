@@ -285,3 +285,4 @@ import type {
 
 Para dúvidas ou problemas, consulte a documentação completa no README principal do projeto.
 
+

@@ -286,3 +286,4 @@ A documentação foi feita com carinho para ajudar você a:
 *Documentação mantida pela equipe do Cinema App*  
 *Última atualização: Outubro 2025*
 
+

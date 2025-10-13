@@ -5,21 +5,26 @@
  * Com mapa de assentos, legendas e botão de compra.
  */
 
-import { router } from 'expo-router';
-import { useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import {
-    Alert,
-    FlatList,
-    Modal,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { BorderRadius, Spacing, Typography } from '../constants/theme';
+import { cancelBookingBySeat, createBooking, getSessionBookings } from '../api/booking';
+import { GradientBackground } from '../components/ui';
+import { BorderRadius, Colors, Spacing, Typography } from '../constants/theme';
+import { getUser } from '../services/auth.session';
 
 interface Seat {
   id: string;
@@ -35,12 +40,63 @@ interface SeatRow {
 }
 
 export default function SeatsScreen() {
+  const params = useLocalSearchParams();
+  const movieId = (params.movieId as string) || '1';
+  const movieTitle = (params.movieTitle as string) || 'Tron: Ares';
+  const format = (params.format as string) || 'DUBLADO';
+  const time = (params.time as string) || '14:30';
+  
   const [activeTab, setActiveTab] = useState<'seats' | 'prices'>('seats');
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [purchasedSeats, setPurchasedSeats] = useState<string[]>([]);
-  const [selectedTime, setSelectedTime] = useState('14:30');
+  const [selectedTime, setSelectedTime] = useState(time);
   const [showModal, setShowModal] = useState(false);
   const [selectedSeatInfo, setSelectedSeatInfo] = useState<Seat | null>(null);
+  const [userId, setUserId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const loadUserAndBookings = useCallback(async () => {
+    try {
+      setLoading(true);
+      console.log('🔄 Carregando dados da sessão...');
+      console.log('📍 Filme:', movieId, '| Horário:', time);
+      
+      // Busca o usuário logado
+      const user = await getUser();
+      if (user) {
+        setUserId(user.id);
+        console.log('👤 Usuário logado:', user.name, '(ID:', user.id, ')');
+      } else {
+        console.log('⚠️ Nenhum usuário logado');
+      }
+
+      // Busca as reservas desta sessão do banco de dados
+      const bookings = await getSessionBookings(movieId, time);
+      console.log('📦 Reservas encontradas no banco:', bookings);
+      
+      const bookedSeats = bookings.map(b => b.seatId);
+      setPurchasedSeats(bookedSeats);
+      console.log('🎫 Assentos reservados para esta sessão:', bookedSeats);
+    } catch (error) {
+      console.error('❌ Erro ao carregar dados:', error);
+    } finally {
+      setLoading(false);
+      console.log('✅ Carregamento concluído');
+    }
+  }, [movieId, time]);
+
+  // Carrega ao montar o componente
+  useEffect(() => {
+    loadUserAndBookings();
+  }, [loadUserAndBookings]);
+
+  // Recarrega quando a tela receber foco
+  useFocusEffect(
+    useCallback(() => {
+      console.log('🔄 Tela recebeu foco - recarregando dados...');
+      loadUserAndBookings();
+    }, [loadUserAndBookings])
+  );
 
   // Horários disponíveis
   const showtimes = ['14:30', '16:30', '19:30', '22:00', '17:00', '21:30'];
@@ -58,10 +114,8 @@ export default function SeatsScreen() {
         let status: Seat['status'] = 'available';
         let type: Seat['type'] = 'regular';
         
-        // Simula assentos ocupados
-        if (Math.random() < 0.3) {
-          status = 'occupied';
-        }
+        // NÃO gera assentos ocupados aleatoriamente
+        // Os assentos ocupados virão do banco de dados (purchasedSeats)
         
         // Assentos especiais
         if (letter === 'J' && (i === 4 || i === 11 || i === 16)) {
@@ -148,50 +202,94 @@ export default function SeatsScreen() {
     const isSelected = selectedSeats.includes(seat.id);
     const isPurchased = purchasedSeats.includes(seat.id);
     
-    // Define a cor do assento baseado no status
-    let seatStyle = styles.seat;
-    
-    if (isPurchased) {
-      // Assento comprado (vermelho)
-      seatStyle = styles.purchasedSeat;
-    } else if (isSelected) {
-      // Assento selecionado (verde)
-      seatStyle = styles.selectedSeat;
-    } else if (seat.status === 'occupied') {
-      // Assento ocupado (cinza)
-      seatStyle = styles.occupiedSeat;
-    } else if (seat.status === 'wheelchair') {
-      // Assento para cadeirante
-      seatStyle = styles.wheelchairSeat;
-    } else if (seat.status === 'reduced-mobility') {
-      // Assento para mobilidade reduzida
-      seatStyle = styles.reducedMobilitySeat;
-    } else if (seat.status === 'companion') {
-      // Assento para acompanhante
-      seatStyle = styles.companionSeat;
-    }
-    
     return (
       <TouchableOpacity
         key={seat.id}
         style={[
-          seatStyle,
+          styles.seat,
           seat.type === 'special' && styles.specialSeat,
+          isPurchased && styles.purchasedSeat,
+          isSelected && !isPurchased && styles.selectedSeat,
+          seat.status === 'occupied' && !isPurchased && styles.occupiedSeat,
+          seat.status === 'wheelchair' && !isPurchased && !isSelected && styles.wheelchairSeat,
+          seat.status === 'reduced-mobility' && !isPurchased && !isSelected && styles.reducedMobilitySeat,
+          seat.status === 'companion' && !isPurchased && !isSelected && styles.companionSeat,
         ]}
         onPress={() => {
-          // Não permite interação com assentos ocupados ou comprados
-          if (seat.status === 'occupied' || isPurchased) return;
+          console.log(`🎯 Assento ${seat.id} clicado`);
+          console.log(`📊 Status - Comprado: ${isPurchased}, Selecionado: ${isSelected}, Ocupado: ${seat.status}`);
+          
+          // Se o assento foi comprado pelo usuário, permite cancelar a compra
+          if (isPurchased) {
+            console.log('🔴 Assento COMPRADO - Abrindo confirmação de cancelamento');
+            Alert.alert(
+              'Cancelar Compra? 🎫',
+              `Você comprou o assento ${seat.id}.\n\nDeseja cancelar esta compra?\n\nO assento ficará disponível novamente.`,
+              [
+                {
+                  text: 'Não',
+                  style: 'cancel',
+                  onPress: () => console.log('❌ Cancelamento recusado')
+                },
+                {
+                  text: 'Sim, Cancelar Compra',
+                  style: 'destructive',
+                  onPress: async () => {
+                    try {
+                      console.log(`✅ Cancelando compra do assento ${seat.id}`);
+                      
+                      // Cancela no banco de dados se o usuário estiver logado
+                      if (userId) {
+                        await cancelBookingBySeat(userId, movieId, seat.id, time);
+                        console.log('🗑️ Reserva removida do banco de dados');
+                      }
+                      
+                      const newPurchased = purchasedSeats.filter(id => id !== seat.id);
+                      console.log('📝 Novos assentos comprados:', newPurchased);
+                      setPurchasedSeats(newPurchased);
+                      
+                      Alert.alert(
+                        'Compra Cancelada! ✓',
+                        `O assento ${seat.id} foi liberado e está disponível novamente.`
+                      );
+                    } catch (error: any) {
+                      console.error('Erro ao cancelar reserva:', error);
+                      Alert.alert('Erro', 'Erro ao cancelar reserva. Tente novamente.');
+                    }
+                  }
+                }
+              ]
+            );
+            return;
+          }
+          
+          // Não permite interação com assentos ocupados (mas não comprados por este usuário)
+          if (seat.status === 'occupied') {
+            console.log('⛔ Assento ocupado - sem ação');
+            return;
+          }
+          
+          // Se o assento já está selecionado, permite desmarcar direto
+          if (isSelected) {
+            console.log('🟢 Desmarcando assento selecionado');
+            setSelectedSeats(selectedSeats.filter(id => id !== seat.id));
+            return;
+          }
           
           // Abre modal com informações do assento
+          console.log('ℹ️ Abrindo modal para assento disponível');
           setSelectedSeatInfo(seat);
           setShowModal(true);
         }}
-        disabled={seat.status === 'occupied' || isPurchased}
+        disabled={seat.status === 'occupied' && !isPurchased}
+        activeOpacity={0.7}
       >
         {seat.status === 'wheelchair' && <Text style={styles.seatIcon}>♿</Text>}
         {seat.status === 'reduced-mobility' && <Text style={styles.seatIcon}>M</Text>}
         {seat.status === 'companion' && <Text style={styles.seatIcon}>👤</Text>}
-        {(seat.status === 'occupied' || isPurchased) && <Text style={styles.seatIcon}>👤</Text>}
+        {seat.status === 'occupied' && <Text style={styles.seatIcon}>👤</Text>}
+        {isPurchased && <Text style={styles.seatIcon}>👤</Text>}
+        {isSelected && !isPurchased && <Text style={styles.seatIcon}>✓</Text>}
       </TouchableOpacity>
     );
   };
@@ -320,7 +418,9 @@ export default function SeatsScreen() {
            <Text style={styles.legendText}>Disponível</Text>
          </View>
          <View style={styles.legendItem}>
-           <View style={[styles.legendIcon, styles.selectedIcon]} />
+           <View style={[styles.legendIcon, styles.selectedIcon]}>
+             <Text style={styles.legendIconText}>✓</Text>
+           </View>
            <Text style={styles.legendText}>Selecionado</Text>
          </View>
          <View style={styles.legendItem}>
@@ -369,17 +469,33 @@ export default function SeatsScreen() {
     </View>
   );
 
+  // Mostra loading enquanto carrega os dados
+  if (loading) {
+    return (
+      <GradientBackground variant="primary">
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={Colors.light} />
+            <Text style={styles.loadingText}>Carregando assentos...</Text>
+            <Text style={styles.loadingSubtext}>Buscando reservas do banco de dados</Text>
+          </View>
+        </SafeAreaView>
+      </GradientBackground>
+    );
+  }
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" />
+    <GradientBackground variant="primary">
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="light-content" />
       
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Text style={styles.cinemaName}>UCI Kinoplex Shopping Recife</Text>
-          <Text style={styles.movieTitle}>Tron: Ares</Text>
+          <Text style={styles.movieTitle}>{movieTitle}</Text>
           <View style={styles.languageTag}>
-            <Text style={styles.languageText}>DUBLADO</Text>
+            <Text style={styles.languageText}>{format}</Text>
           </View>
         </View>
         
@@ -428,42 +544,145 @@ export default function SeatsScreen() {
         {activeTab === 'seats' && renderLegend()}
       </View>
 
-       {/* Botão de compra */}
-       <TouchableOpacity
-         style={styles.buyButton}
-         onPress={() => {
-           if (selectedSeats.length === 0) {
-             Alert.alert('Selecione assentos', 'Por favor, selecione pelo menos um assento.');
-             return;
-           }
-           
-           // Marca os assentos como comprados (vermelhos)
-           setPurchasedSeats([...purchasedSeats, ...selectedSeats]);
-           
-           // Limpa a seleção
-           setSelectedSeats([]);
-           
-           Alert.alert(
-             'Compra realizada!',
-             `Assentos comprados: ${selectedSeats.join(', ')}\n\nOs assentos agora estão ocupados (vermelhos).`
-           );
-         }}
-       >
-         <Text style={styles.buyButtonText}>
-           Comprar {selectedSeats.length > 0 && `(${selectedSeats.length})`}
-         </Text>
-       </TouchableOpacity>
+       {/* Botões de ação */}
+       <View style={styles.actionsFooter}>
+         {/* Botão desistir seleção */}
+         {selectedSeats.length > 0 && (
+           <TouchableOpacity
+             style={styles.clearButton}
+             onPress={() => {
+               console.log('🔴 Botão Desistir clicado');
+               console.log('📋 Assentos selecionados:', selectedSeats);
+               
+               Alert.alert(
+                 'Desistir dos Assentos? 🎫',
+                 `Você tem ${selectedSeats.length} assento(s) selecionado(s) (verdes).\n\nDeseja desmarcar todos?`,
+                 [
+                   {
+                     text: 'Não',
+                     style: 'cancel',
+                     onPress: () => console.log('❌ Desistência cancelada')
+                   },
+                   {
+                     text: 'Sim, Desmarcar',
+                     style: 'destructive',
+                     onPress: () => {
+                       console.log('✅ Desmarcando assentos:', selectedSeats);
+                       setSelectedSeats([]);
+                       console.log('✓ Assentos desmarcados com sucesso');
+                       
+                       Alert.alert(
+                         'Assentos Desmarcados! ✓',
+                         'Todos os assentos selecionados foram desmarcados.'
+                       );
+                     }
+                   }
+                 ]
+               );
+             }}
+             activeOpacity={0.7}
+           >
+             <Text style={styles.clearButtonText}>
+               ✕ Desistir ({selectedSeats.length})
+             </Text>
+           </TouchableOpacity>
+         )}
+         
+         {/* Botão de compra */}
+         <TouchableOpacity
+           style={[
+             styles.buyButton,
+             selectedSeats.length === 0 && styles.buyButtonDisabled
+           ]}
+           onPress={async () => {
+             if (selectedSeats.length === 0) {
+               Alert.alert('Selecione assentos', 'Por favor, selecione pelo menos um assento.');
+               return;
+             }
+
+             if (!userId) {
+               Alert.alert('Erro', 'Você precisa estar logado para fazer uma reserva.');
+               return;
+             }
+             
+             try {
+               // Salva cada assento no banco de dados
+               for (const seatId of selectedSeats) {
+                 await createBooking({
+                   userId: userId,
+                   movieId: movieId,
+                   movieTitle: movieTitle,
+                   seatId: seatId,
+                   sessionFormat: format,
+                   sessionTime: time,
+                   price: 32.00,
+                 });
+               }
+
+               console.log('✅ Reservas salvas no banco de dados');
+               
+               // Marca os assentos como comprados (vermelhos)
+               setPurchasedSeats([...purchasedSeats, ...selectedSeats]);
+               
+               const seats = selectedSeats.join(', ');
+               
+               // Limpa a seleção
+               setSelectedSeats([]);
+               
+               Alert.alert(
+                 'Compra realizada! 🎉',
+                 `Assentos comprados: ${seats}\n\nFilme: ${movieTitle}\nHorário: ${time}\nFormato: ${format}\n\n✅ Reserva salva no sistema!`,
+                 [
+                   {
+                     text: 'OK',
+                     onPress: () => router.back()
+                   }
+                 ]
+               );
+             } catch (error: any) {
+               console.error('Erro ao salvar reserva:', error);
+               Alert.alert('Erro', error.message || 'Erro ao salvar reserva. Tente novamente.');
+             }
+           }}
+           disabled={selectedSeats.length === 0}
+         >
+           <Text style={styles.buyButtonText}>
+             Comprar {selectedSeats.length > 0 && `(${selectedSeats.length})`}
+           </Text>
+         </TouchableOpacity>
+       </View>
 
        {/* Modal de seleção de assento */}
        {renderSeatModal()}
-     </SafeAreaView>
+      </SafeAreaView>
+    </GradientBackground>
    );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: 'transparent',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.xl,
+  },
+  loadingText: {
+    fontSize: Typography.sizes.lg,
+    fontWeight: Typography.weights.semibold,
+    color: Colors.light,
+    marginTop: Spacing.md,
+    textAlign: 'center',
+  },
+  loadingSubtext: {
+    fontSize: Typography.sizes.sm,
+    color: Colors.light,
+    marginTop: Spacing.xs,
+    textAlign: 'center',
+    opacity: 0.9,
   },
   
   // Header
@@ -492,7 +711,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#007AFF',
     paddingHorizontal: Spacing.sm,
     paddingVertical: 4,
-    borderRadius: BorderRadius.xs,
+    borderRadius: BorderRadius.sm,
     alignSelf: 'flex-start',
   },
   languageText: {
@@ -729,13 +948,38 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   
-  // Buy button
+  // Buttons
+  actionsFooter: {
+    flexDirection: 'row',
+    padding: Spacing.md,
+    gap: Spacing.sm,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  clearButton: {
+    backgroundColor: '#FF3B30',
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  clearButtonText: {
+    fontSize: Typography.sizes.sm,
+    fontWeight: Typography.weights.bold,
+    color: '#FFFFFF',
+  },
   buyButton: {
     backgroundColor: '#007AFF',
-    margin: Spacing.md,
+    flex: 1,
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.md,
     alignItems: 'center',
+  },
+  buyButtonDisabled: {
+    backgroundColor: '#8E8E93',
+    opacity: 0.5,
   },
   buyButtonText: {
     fontSize: Typography.sizes.lg,

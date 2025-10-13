@@ -19,7 +19,7 @@ import {
   View
 } from 'react-native';
 import type { Movie } from '../api/src';
-import { Input, MovieCard } from '../components/ui';
+import { GradientBackground, Input, MovieCard } from '../components/ui';
 import { BorderRadius, Colors, Spacing, Typography } from '../constants/theme';
 import { fetchPopularMovies, searchMovies } from '../services/tmdb.service';
 
@@ -126,13 +126,15 @@ export default function MoviesScreen() {
    */
   if (loading) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color={Colors.primary.start} />
-          <Text style={styles.loadingText}>Carregando filmes...</Text>
-          <Text style={styles.loadingSubtext}>Buscando os melhores títulos para você</Text>
-        </View>
-      </SafeAreaView>
+      <GradientBackground variant="primary">
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" color={Colors.light} />
+            <Text style={styles.loadingText}>Carregando filmes...</Text>
+            <Text style={styles.loadingSubtext}>Buscando os melhores títulos para você</Text>
+          </View>
+        </SafeAreaView>
+      </GradientBackground>
     );
   }
 
@@ -141,19 +143,21 @@ export default function MoviesScreen() {
    */
   if (error) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.centerContainer}>
-          <Text style={styles.errorEmoji}>😕</Text>
-          <Text style={styles.errorTitle}>Oops! Algo deu errado</Text>
-          <Text style={styles.errorMessage}>{error}</Text>
-          <TouchableOpacity
-            style={styles.retryButton}
-            onPress={() => loadMovies()}
-          >
-            <Text style={styles.retryButtonText}>Tentar Novamente</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
+      <GradientBackground variant="primary">
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.centerContainer}>
+            <Text style={styles.errorEmoji}>😕</Text>
+            <Text style={styles.errorTitle}>Oops! Algo deu errado</Text>
+            <Text style={styles.errorMessage}>{error}</Text>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={() => loadMovies()}
+            >
+              <Text style={styles.retryButtonText}>Tentar Novamente</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </GradientBackground>
     );
   }
 
@@ -162,15 +166,17 @@ export default function MoviesScreen() {
    */
   if (data.length === 0) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.centerContainer}>
-          <Text style={styles.emptyEmoji}>🎭</Text>
-          <Text style={styles.emptyTitle}>Nenhum filme encontrado</Text>
-          <Text style={styles.emptyMessage}>
-            Não conseguimos encontrar filmes no momento.
-          </Text>
-        </View>
-      </SafeAreaView>
+      <GradientBackground variant="primary">
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.centerContainer}>
+            <Text style={styles.emptyEmoji}>🎭</Text>
+            <Text style={styles.emptyTitle}>Nenhum filme encontrado</Text>
+            <Text style={styles.emptyMessage}>
+              Não conseguimos encontrar filmes no momento.
+            </Text>
+          </View>
+        </SafeAreaView>
+      </GradientBackground>
     );
   }
 
@@ -178,46 +184,48 @@ export default function MoviesScreen() {
    * Renderiza a lista de filmes
    */
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" />
-      
-      <FlatList
-        data={data}
-        keyExtractor={(item) => String(item.id)}
-        numColumns={2}
-        contentContainerStyle={styles.listContent}
-        columnWrapperStyle={styles.columnWrapper}
-        ListHeaderComponent={renderHeader}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => loadMovies(true)}
-            tintColor={Colors.primary.start}
-            colors={[Colors.primary.start, Colors.primary.middle]}
-          />
-        }
-        renderItem={({ item }) => (
-          <View style={styles.movieCardWrapper}>
-            <MovieCard
-              title={item.title}
-              posterPath={item.posterPath}
-              rating={item.voteAverage}
-              onPress={() => {
-                router.push(`/movie/${item.id}` as any);
-              }}
+    <GradientBackground variant="primary">
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="light-content" />
+        
+        <FlatList
+          data={data}
+          keyExtractor={(item) => String(item.id)}
+          numColumns={2}
+          contentContainerStyle={styles.listContent}
+          columnWrapperStyle={styles.columnWrapper}
+          ListHeaderComponent={renderHeader}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => loadMovies(true)}
+              tintColor={Colors.light}
+              colors={[Colors.light]}
             />
-          </View>
-        )}
-      />
-    </SafeAreaView>
+          }
+          renderItem={({ item }) => (
+            <View style={styles.movieCardWrapper}>
+              <MovieCard
+                title={item.title}
+                posterPath={item.posterPath}
+                rating={item.voteAverage}
+                onPress={() => {
+                  router.push(`/movie/${item.id}` as any);
+                }}
+              />
+            </View>
+          )}
+        />
+      </SafeAreaView>
+    </GradientBackground>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.lightSecondary,
+    backgroundColor: 'transparent',
   },
   centerContainer: {
     flex: 1,
@@ -227,7 +235,7 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: Spacing.md,
-    backgroundColor: Colors.light,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     gap: Spacing.md,
   },
   headerTop: {
@@ -267,14 +275,15 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.semibold,
-    color: Colors.text.primary,
+    color: Colors.light,
     marginTop: Spacing.md,
   },
   loadingSubtext: {
     fontSize: Typography.sizes.sm,
-    color: Colors.text.secondary,
+    color: Colors.light,
     marginTop: Spacing.xs,
     textAlign: 'center',
+    opacity: 0.9,
   },
   errorEmoji: {
     fontSize: 64,
@@ -283,21 +292,24 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: Typography.sizes.xl,
     fontWeight: Typography.weights.bold,
-    color: Colors.text.primary,
+    color: Colors.light,
     marginBottom: Spacing.sm,
     textAlign: 'center',
   },
   errorMessage: {
     fontSize: Typography.sizes.md,
-    color: Colors.text.secondary,
+    color: Colors.light,
     textAlign: 'center',
     marginBottom: Spacing.xl,
+    opacity: 0.9,
   },
   retryButton: {
-    backgroundColor: Colors.primary.start,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.md,
+    borderWidth: 2,
+    borderColor: Colors.light,
   },
   retryButtonText: {
     fontSize: Typography.sizes.md,
@@ -311,13 +323,14 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: Typography.sizes.xl,
     fontWeight: Typography.weights.bold,
-    color: Colors.text.primary,
+    color: Colors.light,
     marginBottom: Spacing.sm,
     textAlign: 'center',
   },
   emptyMessage: {
     fontSize: Typography.sizes.md,
-    color: Colors.text.secondary,
+    color: Colors.light,
     textAlign: 'center',
+    opacity: 0.9,
   },
 });

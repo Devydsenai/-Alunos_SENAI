@@ -28,10 +28,10 @@ export const Colors = {
   lightSecondary: '#f8f9fa',
   
   // Estados
-  success: '#10b981',
-  error: '#ef4444',
-  warning: '#f59e0b',
-  info: '#3b82f6',
+  success: '#22C55E',
+  error: '#F44336',
+  warning: '#FF9500',
+  info: '#007AFF',
   
   // Textos
   text: {

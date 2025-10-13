@@ -47,6 +47,15 @@ export default function LoginScreen() {
     try {
       setLoading(true);
       const user = await login(email.trim(), password);
+      
+      // Salva o usuário na sessão
+      const { saveUser } = await import('../../services/auth.session');
+      await saveUser({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      });
+      
       Alert.alert('Bem-vindo! 👋', `Olá, ${user.name}!`);
       router.replace('/movies' as any);
     } catch (e: any) {

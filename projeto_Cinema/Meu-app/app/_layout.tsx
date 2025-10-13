@@ -1,7 +1,24 @@
 import { Stack } from "expo-router";
+import { useEffect } from "react";
+import { initializeAPI } from "../api/src";
 import { Colors } from "../constants/theme";
 
 export default function RootLayout() {
+  // Inicializa o banco de dados quando o app abre
+  useEffect(() => {
+    const initDB = async () => {
+      try {
+        console.log('🔄 Inicializando banco de dados...');
+        await initializeAPI();
+        console.log('✅ Banco de dados inicializado!');
+      } catch (error) {
+        console.error('❌ Erro ao inicializar banco:', error);
+      }
+    };
+    
+    initDB();
+  }, []);
+
   return (
     <Stack
       screenOptions={{

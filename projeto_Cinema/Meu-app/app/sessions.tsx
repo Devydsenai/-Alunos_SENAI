@@ -9,6 +9,7 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
+    Alert,
     FlatList,
     Image,
     SafeAreaView,
@@ -19,6 +20,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { GradientBackground } from '../components/ui';
 import { BorderRadius, Colors, Spacing, Typography } from '../constants/theme';
 import { fetchNowPlayingMovies } from '../services/tmdb.service';
 
@@ -48,6 +50,7 @@ export default function SessionsScreen() {
   const [activeTab, setActiveTab] = useState<'sessions' | 'details'>('sessions');
   const [selectedFormat, setSelectedFormat] = useState('Normal');
   const [days, setDays] = useState<DayOption[]>([]);
+  const [selectedSession, setSelectedSession] = useState<string | null>(null);
 
   /**
    * Gera dias da semana para seleção
@@ -245,11 +248,30 @@ export default function SessionsScreen() {
               </TouchableOpacity>
               
               <View style={styles.timesContainer}>
-                {session.times.map((time, timeIndex) => (
-                  <TouchableOpacity key={timeIndex} style={styles.timeButton}>
-                    <Text style={styles.timeButtonText}>{time}</Text>
-                  </TouchableOpacity>
-                ))}
+                {session.times.map((time, timeIndex) => {
+                  const sessionKey = `${item.id}-${session.format}-${time}`;
+                  const isSelected = selectedSession === sessionKey;
+                  
+                  return (
+                    <TouchableOpacity 
+                      key={timeIndex} 
+                      style={[
+                        styles.timeButton,
+                        isSelected && styles.timeButtonSelected
+                      ]}
+                      onPress={() => {
+                        setSelectedSession(sessionKey);
+                      }}
+                    >
+                      <Text style={[
+                        styles.timeButtonText,
+                        isSelected && styles.timeButtonTextSelected
+                      ]}>
+                        {time}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             </View>
           ))}
@@ -259,7 +281,30 @@ export default function SessionsScreen() {
       <View style={styles.actionsContainer}>
         <TouchableOpacity 
           style={styles.actionButton}
-          onPress={() => router.push('/seats')}
+          onPress={() => {
+            // Verifica se há uma sessão selecionada para este filme
+            const hasSessionForThisMovie = selectedSession && selectedSession.startsWith(`${item.id}-`);
+            
+            if (!hasSessionForThisMovie) {
+              Alert.alert('Selecione um horário', 'Por favor, selecione um horário para este filme antes de escolher os assentos.');
+              return;
+            }
+            
+            // Extrai informações da sessão selecionada
+            const sessionParts = selectedSession.split('-');
+            const format = sessionParts.slice(1, -1).join('-');
+            const time = sessionParts[sessionParts.length - 1];
+            
+            router.push({
+              pathname: '/seats',
+              params: {
+                movieId: item.id,
+                movieTitle: item.title,
+                format: format,
+                time: time,
+              }
+            } as any);
+          }}
         >
           <Text style={styles.actionIcon}>🪑</Text>
           <Text style={styles.actionText}>Assentos</Text>
@@ -275,30 +320,35 @@ export default function SessionsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color={Colors.primary.start} />
-          <Text style={styles.loadingText}>Carregando sessões...</Text>
-        </View>
-      </SafeAreaView>
+      <GradientBackground variant="primary">
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" color={Colors.light} />
+            <Text style={styles.loadingText}>Carregando sessões...</Text>
+          </View>
+        </SafeAreaView>
+      </GradientBackground>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.centerContainer}>
-          <Text style={styles.errorEmoji}>😕</Text>
-          <Text style={styles.errorTitle}>Oops! Algo deu errado</Text>
-          <Text style={styles.errorMessage}>{error}</Text>
-        </View>
-      </SafeAreaView>
+      <GradientBackground variant="primary">
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.centerContainer}>
+            <Text style={styles.errorEmoji}>😕</Text>
+            <Text style={styles.errorTitle}>Oops! Algo deu errado</Text>
+            <Text style={styles.errorMessage}>{error}</Text>
+          </View>
+        </SafeAreaView>
+      </GradientBackground>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" />
+    <GradientBackground variant="primary">
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="light-content" />
       
       {/* Header com tabs */}
       <View style={styles.header}>
@@ -318,14 +368,15 @@ export default function SessionsScreen() {
           contentContainerStyle={styles.listContent}
         />
       </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </GradientBackground>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: 'transparent',
   },
   centerContainer: {
     flex: 1,
@@ -334,7 +385,7 @@ const styles = StyleSheet.create({
     padding: Spacing.xl,
   },
   header: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: 'transparent',
     paddingTop: Spacing.md,
   },
   
@@ -428,7 +479,7 @@ const styles = StyleSheet.create({
   // Content
   content: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: 'transparent',
   },
   contentTitle: {
     fontSize: Typography.sizes.lg,
@@ -521,14 +572,23 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
   },
   timeButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: 'transparent',
     paddingHorizontal: Spacing.sm,
     paddingVertical: 4,
     borderRadius: BorderRadius.xs,
+    borderWidth: 1,
+    borderColor: '#007AFF',
+  },
+  timeButtonSelected: {
+    backgroundColor: '#007AFF', // Azul quando selecionado
+    borderColor: '#007AFF',
   },
   timeButtonText: {
     fontSize: Typography.sizes.xs,
     fontWeight: Typography.weights.bold,
+    color: '#007AFF',
+  },
+  timeButtonTextSelected: {
     color: '#FFFFFF',
   },
   
@@ -555,7 +615,7 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.semibold,
-    color: '#FFFFFF',
+    color: Colors.light,
     marginTop: Spacing.md,
   },
   errorEmoji: {
@@ -565,13 +625,14 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: Typography.sizes.xl,
     fontWeight: Typography.weights.bold,
-    color: '#FFFFFF',
+    color: Colors.light,
     marginBottom: Spacing.sm,
     textAlign: 'center',
   },
   errorMessage: {
     fontSize: Typography.sizes.md,
-    color: '#8E8E93',
+    color: Colors.light,
     textAlign: 'center',
+    opacity: 0.9,
   },
 });

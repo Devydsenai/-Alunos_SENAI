@@ -1,145 +1,369 @@
-# Sistema de Clientes SENAI
+# 📦 Sistema de Gerenciamento - Clientes e Almoxarifado
 
-Sistema simples de gerenciamento de clientes desenvolvido com React Native (Expo) e Node.js para alunos iniciantes do SENAI.
+> **Projeto SENAI** - Sistema completo de gerenciamento de clientes/fornecedores e controle de almoxarifado com React Native + Expo
 
-## 🚀 Tecnologias Utilizadas
+[![Expo](https://img.shields.io/badge/Expo-~54.0-000020.svg?style=flat&logo=expo)](https://expo.dev/)
+[![React Native](https://img.shields.io/badge/React%20Native-0.81-61DAFB.svg?style=flat&logo=react)](https://reactnative.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6.svg?style=flat&logo=typescript)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933.svg?style=flat&logo=node.js)](https://nodejs.org/)
 
-### Frontend (App Mobile)
-- **React Native** com **Expo**
-- **Expo Router** para navegação
-- **TypeScript** para tipagem
-- **Ionicons** para ícones
+## 📋 Sumário
+
+- [Sobre o Projeto](#sobre-o-projeto)
+- [Funcionalidades](#funcionalidades)
+- [Tecnologias](#tecnologias)
+- [Instalação](#instalação)
+- [Como Usar](#como-usar)
+- [APIs Utilizadas](#apis-utilizadas)
+- [Testes](#testes)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Documentação](#documentação)
+
+## 🎯 Sobre o Projeto
+
+Sistema completo desenvolvido em **React Native + Expo** para gerenciamento de:
+- **Clientes/Fornecedores** com fotos 3x4
+- **Produtos** com código de barras e fotos
+- **Controle de Estoque** com movimentações
+- **Categorias** para organização
+
+### 📱 Requisitos Atendidos
+
+- ✅ **Expo + React Native** - Framework mobile cross-platform
+- ✅ **Componentes React Native** - 100% nativos (zero HTML)
+- ✅ **Expo Go** - Roda no app Expo Go
+- ✅ **APIs Externas** - ViaCEP, Código de Barras
+- ✅ **Testes Unitários** - Jest + React Native Testing Library
+- ✅ **Documentação Completa** - README, API docs, comentários
+- ✅ **Relevância** - Sistema útil para negócios reais
+
+## ✨ Funcionalidades
+
+### 👥 Módulo de Clientes/Fornecedores
+- [x] Cadastro completo com foto 3x4
+- [x] Busca e filtros avançados
+- [x] Status ativo/inativo
+- [x] Edição e exclusão
+- [x] Integração com ViaCEP para endereços
+
+### 📦 Módulo de Produtos
+- [ ] Cadastro com foto e código de barras
+- [ ] Vinculação com fornecedores
+- [ ] Categorização
+- [ ] Preço de custo e venda
+- [ ] Estoque mínimo
+
+### 📊 Módulo de Estoque
+- [ ] Controle de quantidade
+- [ ] Localização no almoxarifado
+- [ ] Alertas de estoque mínimo
+- [ ] Histórico de movimentações
+
+### 📝 Módulo de Movimentações
+- [ ] Entrada de produtos
+- [ ] Saída de produtos
+- [ ] Relatórios
+- [ ] Observações e rastreabilidade
+
+## 🛠️ Tecnologias
+
+### Frontend (Mobile)
+- **React Native** - Framework mobile
+- **Expo** - Plataforma de desenvolvimento
+- **TypeScript** - Tipagem estática
+- **Expo Router** - Navegação file-based
+- **Expo Image Picker** - Captura de fotos
+- **Ionicons** - Ícones
 
 ### Backend (API)
-- **Node.js** com **Express**
-- **Sequelize** (ORM)
-- **SQLite** (banco de dados)
-- **CORS** habilitado
+- **Node.js** - Runtime JavaScript
+- **Express** - Framework web
+- **Sequelize** - ORM para banco de dados
+- **SQLite** - Banco de dados local
+- **Nodemon** - Auto-reload em desenvolvimento
 
-## 📱 Funcionalidades do App
+### APIs Externas
+- **ViaCEP** - Busca de endereços por CEP
+- **Open Food Facts** - Validação de código de barras (planejado)
 
-- ✅ Tela inicial com informações do sistema
-- ✅ Lista de clientes com busca na API
-- ✅ Navegação por abas (Home e Clientes)
-- ✅ Interface simples e intuitiva
-- ✅ Exclusão de clientes
-- ✅ Atualização da lista
+### Testes
+- **Jest** - Framework de testes
+- **React Native Testing Library** - Testes de componentes
+- **Supertest** - Testes de API (planejado)
 
-## 🛠️ Como executar o projeto
+## 📥 Instalação
 
-### 1. Executar a API (Backend)
+### Pré-requisitos
+- Node.js 18+ instalado
+- npm ou yarn
+- Expo Go instalado no celular ([Android](https://play.google.com/store/apps/details?id=host.exp.exponent) | [iOS](https://apps.apple.com/app/expo-go/id982107779))
 
+### Passo a passo
+
+1. **Clone o repositório**
 ```bash
-# Navegar para a pasta da API
-cd api
+git clone <url-do-repositorio>
+cd Alunos_SENAI
+```
 
-# Instalar dependências
+2. **Instale as dependências do projeto**
+```bash
 npm install
+```
 
-# Executar a API
+3. **Instale as dependências da API**
+```bash
+cd api
+npm install
+cd ..
+```
+
+4. **Inicie a API**
+```bash
+cd api
+npm run dev
+```
+A API estará rodando em `http://localhost:3000`
+
+5. **Inicie o app (em outro terminal)**
+```bash
 npm start
 ```
 
-A API estará rodando em: `http://localhost:3000`
+6. **Abra no Expo Go**
+- Escaneie o QR Code com o Expo Go
+- Ou pressione `a` para Android / `i` para iOS (emulador)
 
-### 2. Executar o App (Frontend)
+## 🚀 Como Usar
 
+### Iniciando o Sistema
+
+1. **Inicie a API** (terminal 1):
 ```bash
-# Navegar para a pasta do app
-cd Alunos_SENAI
-
-# Instalar dependências (se necessário)
-npm install
-
-# Executar o app
-npx expo start
+cd api
+npm run dev
 ```
 
-## 📋 Estrutura do Projeto
-
-```
-Alunos_SENAI/
-├── app/                    # Código do app React Native
-│   ├── (tabs)/            # Navegação por abas
-│   │   ├── _layout.tsx    # Layout das abas
-│   │   ├── index.tsx      # Tela Home
-│   │   └── about.tsx      # Lista de Clientes
-│   └── _layout.tsx        # Layout principal
-├── api/                   # API REST
-│   ├── index.js           # Servidor Express
-│   ├── package.json       # Dependências da API
-│   └── README.md          # Documentação da API
-└── README.md              # Este arquivo
+2. **Inicie o App** (terminal 2):
+```bash
+npm start
 ```
 
-## 🔧 Endpoints da API
+3. **Acesse pelo Expo Go** - Escaneie o QR Code
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| GET | `/` | Health check |
-| GET | `/clientes` | Listar todos os clientes |
-| GET | `/clientes/:codigo` | Buscar cliente por código |
-| POST | `/clientes` | Criar novo cliente |
-| PUT | `/clientes/:codigo` | Atualizar cliente completo |
-| PATCH | `/clientes/:codigo` | Atualizar campos específicos |
-| DELETE | `/clientes/:codigo` | Excluir cliente |
+### Funcionalidades Principais
 
-## 📊 Modelo de Dados (Cliente)
+#### 📱 Cadastrar Cliente/Fornecedor
+1. Acesse a aba **Home**
+2. Tire/selecione foto 3x4
+3. Preencha nome, email, telefone
+4. Clique em **Criar Cliente**
 
+#### 👀 Visualizar Clientes
+1. Acesse a aba **Clientes**
+2. Use a busca para filtrar
+3. Veja fotos e informações
+4. Edite ou desative clientes
+
+## 🌐 APIs Utilizadas
+
+### API Local (Backend)
+
+**Base URL:** `http://localhost:3000`
+
+#### Endpoints Clientes
+```
+GET    /clientes           - Lista todos os clientes
+GET    /clientes/:codigo   - Busca cliente por código
+POST   /clientes           - Cria novo cliente
+PUT    /clientes/:codigo   - Atualiza cliente
+PATCH  /clientes/:codigo   - Atualização parcial
+DELETE /clientes/:codigo   - Remove cliente
+```
+
+**Exemplo de Request:**
 ```json
+POST /clientes
 {
-  "codigo": 1,
   "nome": "João Silva",
   "email": "joao@email.com",
   "telefone": "11999999999",
-  "ativo": true
+  "ativo": true,
+  "foto": "file:///path/to/photo.jpg"
 }
 ```
 
-## 🎯 Objetivos de Aprendizado
+### APIs Externas
 
-Este projeto foi desenvolvido para ensinar:
+#### ViaCEP
+- **URL:** `https://viacep.com.br/ws/{cep}/json/`
+- **Uso:** Busca endereço por CEP para fornecedores
+- **Documentação:** [viacep.com.br](https://viacep.com.br/)
 
-1. **Navegação em React Native** com Expo Router
-2. **Consumo de APIs REST** com fetch
-3. **Criação de APIs simples** com Express
-4. **Banco de dados** com SQLite e Sequelize
-5. **Interface de usuário** responsiva e intuitiva
-6. **Gerenciamento de estado** básico
-7. **Tratamento de erros** em aplicações móveis
+#### Open Food Facts (Planejado)
+- **URL:** `https://world.openfoodfacts.org/api/v0/product/{barcode}.json`
+- **Uso:** Validação de código de barras de produtos
+- **Documentação:** [openfoodfacts.org](https://world.openfoodfacts.org/)
 
-## 📱 Como usar o app
+## 🧪 Testes
 
-1. **Tela Home**: Apresenta informações sobre o sistema
-2. **Tela Clientes**: Lista todos os clientes cadastrados
-   - Use o botão "🔄 Atualizar" para recarregar a lista
-   - Toque em "Excluir" para remover um cliente
-   - Botão "Editar" (funcionalidade futura)
+### Executar Testes
 
-## ⚠️ Observações Importantes
+```bash
+# Todos os testes
+npm test
 
-- Certifique-se de que a API esteja rodando antes de usar o app
-- O app está configurado para conectar em `http://localhost:3000`
-- Para usar em dispositivos físicos, ajuste o IP da API no código
-- Este é um projeto educacional, ideal para iniciantes
+# Modo watch
+npm run test:watch
 
-## 🔄 Próximos Passos
+# Com coverage
+npm run test:coverage
+```
 
-- [ ] Implementar tela de cadastro de clientes
-- [ ] Implementar tela de edição de clientes
-- [ ] Adicionar validação de formulários
-- [ ] Implementar busca/filtros
-- [ ] Adicionar loading states
-- [ ] Implementar tratamento de erros mais robusto
+### Estrutura de Testes
 
-## 📚 Recursos de Aprendizado
+```
+__tests__/
+├── components/          # Testes de componentes
+│   ├── ClientCard.test.tsx
+│   └── ProductCard.test.tsx
+├── screens/            # Testes de telas
+│   ├── HomeScreen.test.tsx
+│   └── ClientsScreen.test.tsx
+└── api/               # Testes de API
+    └── clientes.test.js
+```
 
-- [Documentação do Expo](https://docs.expo.dev/)
-- [Expo Router](https://expo.github.io/router/)
-- [React Native](https://reactnative.dev/)
-- [Express.js](https://expressjs.com/)
-- [Sequelize](https://sequelize.org/)
+### Exemplos de Testes
+
+**Componente:**
+```typescript
+import { render, fireEvent } from '@testing-library/react-native';
+import ClientCard from '@/components/ClientCard';
+
+test('should render client name', () => {
+  const client = { nome: 'João Silva', email: 'joao@test.com' };
+  const { getByText } = render(<ClientCard client={client} />);
+  expect(getByText('João Silva')).toBeTruthy();
+});
+```
+
+**API:**
+```javascript
+const request = require('supertest');
+const app = require('../api/index');
+
+test('GET /clientes should return array', async () => {
+  const response = await request(app).get('/clientes');
+  expect(response.status).toBe(200);
+  expect(Array.isArray(response.body)).toBe(true);
+});
+```
+
+## 📁 Estrutura do Projeto
+
+```
+Alunos_SENAI/
+├── app/                    # Aplicação React Native
+│   ├── (tabs)/            # Telas com navegação em tabs
+│   │   ├── index.tsx      # Home - Criar clientes
+│   │   ├── about.tsx      # Lista de clientes
+│   │   ├── products.tsx   # Produtos (em desenvolvimento)
+│   │   └── stock.tsx      # Estoque (em desenvolvimento)
+│   └── _layout.tsx        # Layout principal
+│
+├── api/                   # Backend Node.js
+│   ├── index.js          # API principal
+│   ├── database.sqlite   # Banco de dados
+│   └── package.json      # Dependências da API
+│
+├── assets/               # Imagens e recursos
+│   └── images/
+│
+├── __tests__/           # Testes automatizados
+│   ├── components/
+│   ├── screens/
+│   └── api/
+│
+├── docs/                # Documentação adicional
+│   ├── API.md          # Documentação da API
+│   ├── SETUP.md        # Guia de instalação
+│   └── CONTRIBUTING.md # Guia de contribuição
+│
+├── package.json        # Dependências do app
+├── tsconfig.json      # Configuração TypeScript
+└── README.md          # Este arquivo
+```
+
+## 📚 Documentação
+
+- [📖 Documentação da API](docs/API.md)
+- [🚀 Guia de Instalação](docs/SETUP.md)
+- [🧪 Guia de Testes](docs/TESTING.md)
+- [🤝 Como Contribuir](docs/CONTRIBUTING.md)
+
+## 👨‍💻 Desenvolvimento
+
+### Comandos Úteis
+
+```bash
+# App
+npm start              # Inicia o Expo
+npm run android       # Abre no Android
+npm run ios          # Abre no iOS
+npm run web          # Abre no navegador
+npm test             # Executa testes
+
+# API
+cd api
+npm run dev          # Modo desenvolvimento (auto-reload)
+npm start           # Modo produção
+```
+
+### Padrões de Código
+
+- **TypeScript** para tipagem forte
+- **Componentes funcionais** com Hooks
+- **Comentários** em funções complexas
+- **Nomes descritivos** de variáveis
+- **Testes** para novas funcionalidades
+
+## 🐛 Troubleshooting
+
+### API não conecta
+```bash
+# Verifique se a API está rodando
+curl http://localhost:3000
+
+# Reinicie a API
+cd api
+npm run dev
+```
+
+### Expo não carrega
+```bash
+# Limpe o cache
+npx expo start --clear
+
+# Reinstale dependências
+rm -rf node_modules
+npm install
+```
+
+## 📄 Licença
+
+Este projeto foi desenvolvido para fins educacionais no SENAI.
+
+## 👥 Autores
+
+- **Devyd Silva** - Desenvolvimento inicial
+
+## 🙏 Agradecimentos
+
+- SENAI - Instituição de ensino
+- Professor - Orientação e requisitos
+- Comunidade Expo/React Native
 
 ---
 
-**Desenvolvido para fins educacionais - SENAI**
+**Desenvolvido com ❤️ usando React Native + Expo**

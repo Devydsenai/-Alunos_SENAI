@@ -28,6 +28,8 @@ class Database {
 
   public async initialize(): Promise<void> {
     this.db = await SQLite.openDatabaseAsync('cinema.db');
+    
+    // Tabela de usuários
     await this.db.execAsync(`
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,6 +39,24 @@ class Database {
         createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
       );
     `);
+    
+    // Tabela de reservas/compras de assentos
+    await this.db.execAsync(`
+      CREATE TABLE IF NOT EXISTS bookings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        userId INTEGER NOT NULL,
+        movieId TEXT NOT NULL,
+        movieTitle TEXT NOT NULL,
+        seatId TEXT NOT NULL,
+        sessionFormat TEXT NOT NULL,
+        sessionTime TEXT NOT NULL,
+        price REAL DEFAULT 32.00,
+        status TEXT DEFAULT 'active',
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+      );
+    `);
+    
     console.log('✅ Database initialized successfully');
   }
 

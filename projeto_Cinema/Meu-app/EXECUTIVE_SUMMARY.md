@@ -413,3 +413,4 @@ O projeto **Cinema App** foi **completamente transformado** de uma aplicação b
 
 *Outubro 2025*
 
+

@@ -18,6 +18,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { GradientBackground } from '../../components/ui';
 import { BorderRadius, Colors, Spacing, Typography } from '../../constants/theme';
 
 // Import condicional do WebView
@@ -231,20 +232,24 @@ export default function MovieDetailsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={Colors.primary.start} />
-        <Text style={styles.loadingText}>Carregando detalhes...</Text>
-      </View>
+      <GradientBackground variant="primary">
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color={Colors.light} />
+          <Text style={styles.loadingText}>Carregando detalhes...</Text>
+        </View>
+      </GradientBackground>
     );
   }
 
   if (error || !movie) {
     return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>😕</Text>
-        <Text style={styles.errorTitle}>Erro ao carregar</Text>
-        <Text style={styles.errorMessage}>{error || 'Filme não encontrado'}</Text>
-      </View>
+      <GradientBackground variant="primary">
+        <View style={styles.centerContainer}>
+          <Text style={styles.errorText}>😕</Text>
+          <Text style={styles.errorTitle}>Erro ao carregar</Text>
+          <Text style={styles.errorMessage}>{error || 'Filme não encontrado'}</Text>
+        </View>
+      </GradientBackground>
     );
   }
 
@@ -254,7 +259,8 @@ export default function MovieDetailsScreen() {
     <>
       <Stack.Screen options={{ title: movie.title }} />
       
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <GradientBackground variant="primary">
+        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* Backdrop Image */}
         <View style={styles.backdropContainer}>
           {movie.backdropPath ? (
@@ -479,7 +485,8 @@ export default function MovieDetailsScreen() {
             )}
           </View>
         </View>
-      </ScrollView>
+        </ScrollView>
+      </GradientBackground>
     </>
   );
 }
@@ -487,14 +494,14 @@ export default function MovieDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.lightSecondary,
+    backgroundColor: 'transparent',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: Spacing.xl,
-    backgroundColor: Colors.lightSecondary,
+    backgroundColor: 'transparent',
   },
   backdropContainer: {
     position: 'relative',
@@ -748,7 +755,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: Typography.sizes.md,
-    color: Colors.text.secondary,
+    color: Colors.light,
     marginTop: Spacing.md,
   },
   errorText: {
@@ -758,13 +765,14 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: Typography.sizes.xl,
     fontWeight: Typography.weights.bold,
-    color: Colors.text.primary,
+    color: Colors.light,
     marginBottom: Spacing.sm,
   },
   errorMessage: {
     fontSize: Typography.sizes.md,
-    color: Colors.text.secondary,
+    color: Colors.light,
     textAlign: 'center',
+    opacity: 0.9,
   },
 });
 

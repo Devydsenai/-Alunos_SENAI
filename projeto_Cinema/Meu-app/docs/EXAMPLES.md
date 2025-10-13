@@ -804,3 +804,4 @@ function MoviePoster({ uri }) {
 
 Para mais exemplos, consulte o código-fonte das telas em `app/` e componentes em `components/ui/`.
 
+
