@@ -65,6 +65,8 @@
       "!app/_layout.tsx",
       "!app/**/_layout.tsx"
     ],
-    "setupFilesAfterEnv": ["<rootDir>/jest-setup.js"]
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest-setup.js"
+    ]
   }
 }
