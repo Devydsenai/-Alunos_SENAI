@@ -49,14 +49,6 @@ export default function Index() {
             size="large"
             textStyle={{ color: Colors.light }}
           />
-          
-          <Button
-            title="Explorar Filmes"
-            onPress={() => router.push('/movies')}
-            variant="ghost"
-            size="medium"
-            textStyle={{ color: Colors.light }}
-          />
         </View>
       </View>
     </GradientBackground>

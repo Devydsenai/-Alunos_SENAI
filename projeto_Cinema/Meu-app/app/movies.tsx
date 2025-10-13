@@ -5,7 +5,7 @@
  * Implementa carregamento de dados e tratamento de erros.
  */
 
-import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -15,18 +15,21 @@ import {
   StatusBar,
   StyleSheet,
   Text,
-  View,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import type { Movie } from '../api/src';
-import { MovieCard } from '../components/ui';
+import { Input, MovieCard } from '../components/ui';
 import { BorderRadius, Colors, Spacing, Typography } from '../constants/theme';
-import { fetchPopularMovies } from '../services/tmdb.service';
+import { fetchPopularMovies, searchMovies } from '../services/tmdb.service';
 
 export default function MoviesScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [data, setData] = useState<Movie[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searching, setSearching] = useState(false);
 
   /**
    * Carrega os filmes populares
@@ -51,6 +54,30 @@ export default function MoviesScreen() {
     }
   };
 
+  /**
+   * Busca filmes por query
+   */
+  const handleSearch = async (query: string) => {
+    if (!query.trim()) {
+      // Se query vazia, volta para filmes populares
+      loadMovies();
+      return;
+    }
+
+    try {
+      setSearching(true);
+      setError(null);
+      
+      const res = await searchMovies(query.trim());
+      setData(res.results ?? []);
+    } catch (e: any) {
+      setError(e.message ?? 'Erro ao buscar filmes');
+      console.error('Error searching movies:', e);
+    } finally {
+      setSearching(false);
+    }
+  };
+
   useEffect(() => {
     loadMovies();
   }, []);
@@ -60,20 +87,39 @@ export default function MoviesScreen() {
    */
   const renderHeader = () => (
     <View style={styles.header}>
-      <LinearGradient
-        colors={[Colors.primary.start, Colors.primary.middle]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.headerGradient}
-      >
-        <Text style={styles.headerEmoji}>🎬</Text>
-        <Text style={styles.headerTitle}>Filmes Populares</Text>
-        <Text style={styles.headerSubtitle}>
-          Descubra os filmes mais assistidos do momento
-        </Text>
-      </LinearGradient>
+      <View style={styles.headerTop}>
+        <Input
+          placeholder="🔍 Buscar filmes..."
+          value={searchQuery}
+          onChangeText={(text) => {
+            setSearchQuery(text);
+            // Debounce da busca - busca após 500ms de inatividade
+            clearTimeout(searchTimeout ?? 0);
+            const timeoutId = setTimeout(() => {
+              handleSearch(text);
+            }, 500);
+            setSearchTimeout(timeoutId);
+          }}
+          style={[styles.searchInput, { flex: 1 }]}
+          autoCapitalize="none"
+          returnKeyType="search"
+          onSubmitEditing={() => handleSearch(searchQuery)}
+        />
+        <TouchableOpacity
+          style={styles.sessionsButton}
+          onPress={() => router.push('/sessions')}
+        >
+          <Text style={styles.sessionsButtonText}>Sessões</Text>
+        </TouchableOpacity>
+      </View>
+      <Text style={styles.headerSubtitle}>
+        {searchQuery ? `Resultados para "${searchQuery}"` : 'Descubra os filmes mais assistidos do momento'}
+      </Text>
     </View>
   );
+
+  // Estado para debounce da busca
+  const [searchTimeout, setSearchTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   /**
    * Renderiza estado de carregamento
@@ -158,8 +204,7 @@ export default function MoviesScreen() {
               posterPath={item.posterPath}
               rating={item.voteAverage}
               onPress={() => {
-                // TODO: Navegar para tela de detalhes
-                console.log('Movie pressed:', item.title);
+                router.push(`/movie/${item.id}` as any);
               }}
             />
           </View>
@@ -168,9 +213,6 @@ export default function MoviesScreen() {
     </SafeAreaView>
   );
 }
-
-// Importar TouchableOpacity que estava faltando
-import { TouchableOpacity } from 'react-native';
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -184,29 +226,32 @@ const styles = StyleSheet.create({
     padding: Spacing.xl,
   },
   header: {
-    marginBottom: Spacing.xl,
+    padding: Spacing.md,
+    backgroundColor: Colors.light,
+    gap: Spacing.md,
   },
-  headerGradient: {
-    padding: Spacing.xl,
-    borderRadius: BorderRadius.lg,
-    marginHorizontal: Spacing.md,
+  headerTop: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
     alignItems: 'center',
   },
-  headerEmoji: {
-    fontSize: 48,
-    marginBottom: Spacing.sm,
+  searchInput: {
+    marginBottom: 0,
   },
-  headerTitle: {
-    fontSize: Typography.sizes.xxl,
-    fontWeight: Typography.weights.bold,
+  sessionsButton: {
+    backgroundColor: Colors.primary.start,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.sm,
+  },
+  sessionsButtonText: {
     color: Colors.light,
-    marginBottom: Spacing.xs,
-    textAlign: 'center',
+    fontWeight: Typography.weights.bold,
+    fontSize: Typography.sizes.sm,
   },
   headerSubtitle: {
-    fontSize: Typography.sizes.md,
-    color: Colors.light,
-    opacity: 0.9,
+    fontSize: Typography.sizes.sm,
+    color: Colors.text.secondary,
     textAlign: 'center',
   },
   listContent: {

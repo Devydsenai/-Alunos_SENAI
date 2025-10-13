@@ -63,27 +63,39 @@ export default function SignupScreen() {
    * Processa o cadastro
    */
   const onSubmit = async () => {
-    if (!validateForm()) return;
+    console.log('🔍 Validando formulário...');
+    if (!validateForm()) {
+      console.log('❌ Formulário inválido');
+      return;
+    }
 
     try {
       setLoading(true);
-      await signup({
+      console.log('🚀 Iniciando cadastro...');
+      console.log('📝 Dados:', { name: name.trim(), email: email.trim() });
+      
+      const result = await signup({
         name: name.trim(),
         email: email.trim(),
         password,
         confirmPassword,
       });
+      
+      console.log('✅ Cadastro realizado com sucesso!', result);
+      
+      // Redireciona diretamente para login após sucesso
+      console.log('🔄 Redirecionando para login...');
+      
+      // Redirecionamento imediato
+      router.replace('/(auth)/login');
+      
+      // Alert de confirmação
       Alert.alert(
         'Sucesso! 🎉',
-        'Cadastro realizado com sucesso! Faça login para continuar.',
-        [
-          {
-            text: 'Fazer Login',
-            onPress: () => router.replace('/(auth)/login'),
-          },
-        ]
+        'Cadastro realizado com sucesso! Você foi redirecionado para o login.'
       );
     } catch (e: any) {
+      console.error('❌ Erro no cadastro:', e);
       Alert.alert('Erro no Cadastro', e.message ?? 'Falha no cadastro. Tente novamente.');
     } finally {
       setLoading(false);
