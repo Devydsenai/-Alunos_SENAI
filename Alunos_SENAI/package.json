@@ -53,5 +53,24 @@
     "nodemon": "^3.1.10",
     "typescript": "~5.9.2"
   },
+<<<<<<< HEAD
   "private": true
+=======
+  "private": true,
+  "jest": {
+    "preset": "jest-expo",
+    "transformIgnorePatterns": [
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg)"
+    ],
+    "collectCoverageFrom": [
+      "app/**/*.{js,jsx,ts,tsx}",
+      "!app/**/*.d.ts",
+      "!app/_layout.tsx",
+      "!app/**/_layout.tsx"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest-setup.js"
+    ]
+  }
+>>>>>>> 6b784539e5935610d359cf086470863d42277b57
 }
