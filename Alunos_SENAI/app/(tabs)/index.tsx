@@ -1,10 +1,25 @@
+/**
+ * @fileoverview Tela principal do sistema de gerenciamento de fornecedores
+ * Permite visualizar, cadastrar, editar e excluir fornecedores/clientes
+ * @module app/(tabs)/index
+ */
+
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { Link, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-// Interface para o fornecedor
+/**
+ * Interface representando um cliente/fornecedor no sistema
+ * @interface Cliente
+ * @property {number} codigo - Código único identificador do cliente
+ * @property {string} nome - Nome completo do cliente
+ * @property {string} email - Endereço de email do cliente
+ * @property {string} telefone - Número de telefone do cliente
+ * @property {boolean} ativo - Status de atividade do cliente
+ * @property {string} [foto] - URI da foto do cliente (opcional)
+ */
 interface Cliente {
   codigo: number;
   nome: string;
@@ -14,6 +29,12 @@ interface Cliente {
   foto?: string;
 }
 
+/**
+ * Componente principal da tela Home - Sistema de Fornecedores
+ * Gerencia o CRUD completo de clientes/fornecedores com interface integrada
+ * @component
+ * @returns {JSX.Element} Tela principal do sistema
+ */
 export default function HomeScreen() {
   const [pesquisa, setPesquisa] = useState('');
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -33,7 +54,13 @@ export default function HomeScreen() {
   // URL da API
   const API_URL = 'http://localhost:3000';
 
-  // Função para buscar clientes
+  /**
+   * Busca todos os clientes cadastrados na API
+   * @async
+   * @function buscarClientes
+   * @returns {Promise<void>}
+   * @throws {Error} Exibe alerta se a API não estiver disponível
+   */
   const buscarClientes = async () => {
     try {
       setLoadingClientes(true);
@@ -53,7 +80,12 @@ export default function HomeScreen() {
     }
   };
 
-  // Função para filtrar clientes
+  /**
+   * Filtra clientes por nome, email ou telefone
+   * @function filtrarClientes
+   * @param {string} texto - Texto de busca para filtrar clientes
+   * @returns {void}
+   */
   const filtrarClientes = (texto: string) => {
     setPesquisa(texto);
     if (texto.trim() === '') {
@@ -70,7 +102,13 @@ export default function HomeScreen() {
     }
   };
 
-  // Função para tirar foto
+  /**
+   * Abre a câmera do dispositivo para tirar foto do cliente
+   * Solicita permissões necessárias automaticamente
+   * @async
+   * @function tirarFoto
+   * @returns {Promise<void>}
+   */
   const tirarFoto = async () => {
     try {
       // Pedir permissão para usar a câmera
@@ -98,7 +136,13 @@ export default function HomeScreen() {
     }
   };
 
-  // Função para selecionar imagem da galeria
+  /**
+   * Abre a galeria de imagens do dispositivo para selecionar foto do cliente
+   * Solicita permissões necessárias automaticamente
+   * @async
+   * @function selecionarImagem
+   * @returns {Promise<void>}
+   */
   const selecionarImagem = async () => {
     try {
       // Pedir permissão para acessar a galeria
@@ -126,18 +170,34 @@ export default function HomeScreen() {
     }
   };
 
-  // Função para remover foto
+  /**
+   * Remove a foto selecionada do formulário de novo cliente
+   * @function removerFoto
+   * @returns {void}
+   */
   const removerFoto = () => {
     setNovoCliente({...novoCliente, foto: ''});
   };
 
-  // Função para selecionar um cliente da sugestão
+  /**
+   * Seleciona um cliente da lista de sugestões de pesquisa
+   * @function selecionarCliente
+   * @param {Cliente} cliente - Cliente selecionado da lista
+   * @returns {void}
+   */
   const selecionarCliente = (cliente: Cliente) => {
     setPesquisa(cliente.nome);
     setMostrarSugestoes(false);
   };
 
-  // Função para adicionar cliente
+  /**
+   * Adiciona um novo cliente/fornecedor ao sistema via API
+   * Valida campos obrigatórios e trata erros de email duplicado
+   * @async
+   * @function adicionarCliente
+   * @returns {Promise<void>}
+   * @throws {Error} Exibe alerta com mensagem de erro apropriada
+   */
   const adicionarCliente = async () => {
     if (!novoCliente.nome || !novoCliente.email) {
       Alert.alert('Erro', 'Nome e email são obrigatórios');

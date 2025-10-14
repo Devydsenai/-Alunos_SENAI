@@ -306,3 +306,4 @@ npm run dev
 
 **Desenvolvido com React Native + Expo para SENAI** ❤️
 
+

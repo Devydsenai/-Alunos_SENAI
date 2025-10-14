@@ -231,3 +231,4 @@ Os 3 problemas foram corrigidos:
 2. ✅ Deletar Categorias - Funciona com logs
 3. ✅ Saída de Estoque - Modal funcional (sem Alert.prompt)
 
+

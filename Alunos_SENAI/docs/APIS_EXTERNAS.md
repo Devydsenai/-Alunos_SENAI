@@ -279,3 +279,4 @@ console.log('❌ Erro ao buscar CEP:', error);
 **Última atualização:** Outubro 2025
 **Mantido por:** Equipe de Desenvolvimento SENAI
 
+
