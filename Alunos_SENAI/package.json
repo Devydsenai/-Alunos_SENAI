@@ -18,7 +18,6 @@
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
-    "expo": "~54.0.12",
     "expo-constants": "~18.0.9",
     "expo-font": "~14.0.8",
     "expo-haptics": "~15.0.7",
@@ -53,9 +52,6 @@
     "nodemon": "^3.1.10",
     "typescript": "~5.9.2"
   },
-<<<<<<< HEAD
-  "private": true
-=======
   "private": true,
   "jest": {
     "preset": "jest-expo",
@@ -72,5 +68,4 @@
       "<rootDir>/jest-setup.js"
     ]
   }
->>>>>>> 6b784539e5935610d359cf086470863d42277b57
 }
