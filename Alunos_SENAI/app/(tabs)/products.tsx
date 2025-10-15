@@ -329,15 +329,15 @@ export default function ProductsScreen() {
             </S.ProdutoDescricao>
           )}
           {item.categoria && (
-            <S.ProdutoCategoria>📁 {item.categoria.nome}</S.ProdutoCategoria>
+            <S.ProdutoCategoria>Categoria: {item.categoria.nome}</S.ProdutoCategoria>
           )}
           {item.fornecedor && (
-            <S.ProdutoFornecedor>🏢 {item.fornecedor.nome}</S.ProdutoFornecedor>
+            <S.ProdutoFornecedor>Fornecedor: {item.fornecedor.nome}</S.ProdutoFornecedor>
           )}
           <S.PrecosContainer>
-            <S.Preco>💰 R$ {item.preco_venda?.toFixed(2)}</S.Preco>
+            <S.Preco>R$ {item.preco_venda?.toFixed(2)}</S.Preco>
             {item.codigo_barras && (
-              <S.CodigoBarras>📊 {item.codigo_barras}</S.CodigoBarras>
+              <S.CodigoBarras>Código: {item.codigo_barras}</S.CodigoBarras>
             )}
           </S.PrecosContainer>
         </S.ProdutoInfo>

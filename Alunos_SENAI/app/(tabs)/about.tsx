@@ -282,7 +282,7 @@ export default function AboutScreen() {
             <S.BotaoAdicionarTexto>+ Adicionar</S.BotaoAdicionarTexto>
           </S.BotaoAdicionar>
           <S.BotaoAtualizar onPress={buscarClientes}>
-            <S.BotaoAtualizarTexto>🔄</S.BotaoAtualizarTexto>
+            <S.BotaoAtualizarTexto>Atualizar</S.BotaoAtualizarTexto>
           </S.BotaoAtualizar>
         </S.HeaderButtons>
       </S.Header>
@@ -357,11 +357,11 @@ export default function AboutScreen() {
               />
               
               <S.CheckboxContainer>
-                <S.Checkbox
+<S.Checkbox
                   checked={novoCliente.ativo}
                   onPress={() => setNovoCliente({...novoCliente, ativo: !novoCliente.ativo})}
                 >
-                  <S.CheckboxText>✓</S.CheckboxText>
+                  {novoCliente.ativo && <S.CheckboxText>✓</S.CheckboxText>}
                 </S.Checkbox>
                 <S.CheckboxLabel>Fornecedor ativo</S.CheckboxLabel>
               </S.CheckboxContainer>

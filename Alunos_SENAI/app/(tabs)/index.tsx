@@ -361,7 +361,7 @@ export default function HomeScreen() {
               checked={novoCliente.ativo}
               onPress={() => setNovoCliente({...novoCliente, ativo: !novoCliente.ativo})}
             >
-              <S.CheckboxText>✓</S.CheckboxText>
+              {novoCliente.ativo && <S.CheckboxText>✓</S.CheckboxText>}
             </S.Checkbox>
             <S.CheckboxLabel>Fornecedor ativo</S.CheckboxLabel>
           </S.CheckboxContainer>

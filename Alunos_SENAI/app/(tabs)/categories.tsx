@@ -251,7 +251,7 @@ export default function CategoriesScreen() {
                     setNovaCategoria({ ...novaCategoria, ativo: !novaCategoria.ativo })
                   }
                 >
-                  <S.CheckboxText>✓</S.CheckboxText>
+                  {novaCategoria.ativo && <S.CheckboxText>✓</S.CheckboxText>}
                 </S.Checkbox>
                 <S.CheckboxLabel>Categoria ativa</S.CheckboxLabel>
               </S.CheckboxContainer>

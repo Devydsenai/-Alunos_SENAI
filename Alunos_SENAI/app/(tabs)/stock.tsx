@@ -148,17 +148,17 @@ export default function StockScreen() {
           <S.ProdutoInfo>
             <S.ProdutoNome>{item.produto.nome}</S.ProdutoNome>
             {item.localizacao && (
-              <S.Localizacao>📍 {item.localizacao}</S.Localizacao>
+              <S.Localizacao>{item.localizacao}</S.Localizacao>
             )}
             <S.EstoqueInfo>
               <S.Quantidade baixo={estoqueBaixo}>
                 Estoque: {item.quantidade_atual}
               </S.Quantidade>
-              <S.MinimoText>Mín: {item.produto.estoque_minimo}</S.MinimoText>
+              <S.MinimoText>Mínimo: {item.produto.estoque_minimo}</S.MinimoText>
             </S.EstoqueInfo>
             {item.data_ultima_mov && (
               <S.DataText>
-                Últ. mov: {new Date(item.data_ultima_mov).toLocaleDateString()}
+                Última movimentação: {new Date(item.data_ultima_mov).toLocaleDateString()}
               </S.DataText>
             )}
           </S.ProdutoInfo>
@@ -259,7 +259,7 @@ export default function StockScreen() {
         <S.ModalOverlay>
           <S.ModalContent>
             <S.ModalTitle>
-              {tipoMovimentacao === 'entrada' ? '📥 Entrada de Estoque' : '📤 Saída de Estoque'}
+              {tipoMovimentacao === 'entrada' ? 'Entrada de Estoque' : 'Saída de Estoque'}
             </S.ModalTitle>
 
             {tipoMovimentacao === 'saida' && (

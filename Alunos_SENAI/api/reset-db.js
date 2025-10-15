@@ -4,16 +4,16 @@ const path = require('path');
 
 const dbPath = path.join(__dirname, 'database.sqlite');
 
-console.log('🗑️ Deletando banco de dados...');
+console.log('Deletando banco de dados...');
 
 if (fs.existsSync(dbPath)) {
   fs.unlinkSync(dbPath);
-  console.log('✅ Banco deletado!');
+  console.log('Banco deletado!');
 } else {
-  console.log('⚠️ Banco não existe');
+  console.log('Aviso: Banco não existe');
 }
 
 console.log('');
-console.log('✅ Pronto! Execute: npm run dev');
-console.log('📦 Um novo banco será criado automaticamente');
+console.log('Pronto! Execute: npm run dev');
+console.log('Um novo banco será criado automaticamente');
 
