@@ -1,17 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import {
-    Alert,
-    FlatList,
-    Image,
-    Modal,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from 'react-native';
+import { Alert, Modal } from 'react-native';
+import * as S from './stock.styles';
 
 interface Produto {
   codigo: number;
@@ -144,60 +135,56 @@ export default function StockScreen() {
     const estoqueBaixo = item.quantidade_atual <= item.produto.estoque_minimo;
 
     return (
-      <View style={[styles.card, estoqueBaixo && styles.cardAlerta]}>
-        <View style={styles.cardContent}>
+      <S.Card alerta={estoqueBaixo}>
+        <S.CardContent>
           {item.produto.foto ? (
-            <Image source={{ uri: item.produto.foto }} style={styles.produtoFoto} />
+            <S.ProdutoFoto source={{ uri: item.produto.foto }} />
           ) : (
-            <View style={styles.produtoSemFoto}>
+            <S.ProdutoSemFoto>
               <Ionicons name="cube-outline" size={30} color="#ccc" />
-            </View>
+            </S.ProdutoSemFoto>
           )}
 
-          <View style={styles.produtoInfo}>
-            <Text style={styles.produtoNome}>{item.produto.nome}</Text>
+          <S.ProdutoInfo>
+            <S.ProdutoNome>{item.produto.nome}</S.ProdutoNome>
             {item.localizacao && (
-              <Text style={styles.localizacao}>📍 {item.localizacao}</Text>
+              <S.Localizacao>{item.localizacao}</S.Localizacao>
             )}
-            <View style={styles.estoqueInfo}>
-              <Text style={[styles.quantidade, estoqueBaixo && styles.quantidadeBaixa]}>
+            <S.EstoqueInfo>
+              <S.Quantidade baixo={estoqueBaixo}>
                 Estoque: {item.quantidade_atual}
-              </Text>
-              <Text style={styles.minimoText}>Mín: {item.produto.estoque_minimo}</Text>
-            </View>
+              </S.Quantidade>
+              <S.MinimoText>Mínimo: {item.produto.estoque_minimo}</S.MinimoText>
+            </S.EstoqueInfo>
             {item.data_ultima_mov && (
-              <Text style={styles.dataText}>
-                Últ. mov: {new Date(item.data_ultima_mov).toLocaleDateString()}
-              </Text>
+              <S.DataText>
+                Última movimentação: {new Date(item.data_ultima_mov).toLocaleDateString()}
+              </S.DataText>
             )}
-          </View>
+          </S.ProdutoInfo>
 
           {estoqueBaixo && (
-            <View style={styles.alertaBadge}>
+            <S.AlertaBadge>
               <Ionicons name="warning" size={20} color="#FFF" />
-            </View>
+            </S.AlertaBadge>
           )}
-        </View>
+        </S.CardContent>
 
-        <View style={styles.botoesContainer}>
-          <TouchableOpacity
-            style={styles.botaoEntrada}
-            onPress={() => abrirModalEntrada(item)}
-          >
+        <S.BotoesContainer>
+          <S.BotaoEntrada onPress={() => abrirModalEntrada(item)}>
             <Ionicons name="arrow-down-circle" size={16} color="#fff" />
-            <Text style={styles.botaoTexto}>Entrada</Text>
-          </TouchableOpacity>
+            <S.BotaoTexto>Entrada</S.BotaoTexto>
+          </S.BotaoEntrada>
 
-          <TouchableOpacity
-            style={styles.botaoSaida}
+          <S.BotaoSaida
             onPress={() => abrirModalSaida(item)}
             disabled={item.quantidade_atual <= 0}
           >
             <Ionicons name="arrow-up-circle" size={16} color="#fff" />
-            <Text style={styles.botaoTexto}>Saída</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+            <S.BotaoTexto>Saída</S.BotaoTexto>
+          </S.BotaoSaida>
+        </S.BotoesContainer>
+      </S.Card>
     );
   };
 
@@ -207,62 +194,58 @@ export default function StockScreen() {
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Estoque</Text>
-        <TouchableOpacity
-          style={styles.botaoFiltro}
-          onPress={() => setAlertaBaixo(!alertaBaixo)}
-        >
+    <S.Container>
+      <S.Header>
+        <S.Title>Estoque</S.Title>
+        <S.BotaoFiltro onPress={() => setAlertaBaixo(!alertaBaixo)}>
           <Ionicons
             name={alertaBaixo ? 'funnel' : 'funnel-outline'}
             size={20}
             color="#fff"
           />
-          <Text style={styles.botaoFiltroTexto}>
+          <S.BotaoFiltroTexto>
             Baixo ({estoqueBaixo.length})
-          </Text>
-        </TouchableOpacity>
-      </View>
+          </S.BotaoFiltroTexto>
+        </S.BotaoFiltro>
+      </S.Header>
 
       {/* Resumo */}
-      <View style={styles.resumo}>
-        <View style={styles.resumoItem}>
-          <Text style={styles.resumoValor}>{estoques.length}</Text>
-          <Text style={styles.resumoLabel}>Produtos</Text>
-        </View>
-        <View style={styles.resumoDivider} />
-        <View style={styles.resumoItem}>
-          <Text style={[styles.resumoValor, styles.valorAlerta]}>
+      <S.Resumo>
+        <S.ResumoItem>
+          <S.ResumoValor>{estoques.length}</S.ResumoValor>
+          <S.ResumoLabel>Produtos</S.ResumoLabel>
+        </S.ResumoItem>
+        <S.ResumoDivider />
+        <S.ResumoItem>
+          <S.ResumoValor alerta>
             {estoqueBaixo.length}
-          </Text>
-          <Text style={styles.resumoLabel}>Estoque Baixo</Text>
-        </View>
-        <View style={styles.resumoDivider} />
-        <View style={styles.resumoItem}>
-          <Text style={styles.resumoValor}>
+          </S.ResumoValor>
+          <S.ResumoLabel>Estoque Baixo</S.ResumoLabel>
+        </S.ResumoItem>
+        <S.ResumoDivider />
+        <S.ResumoItem>
+          <S.ResumoValor>
             {estoques.reduce((acc, e) => acc + e.quantidade_atual, 0)}
-          </Text>
-          <Text style={styles.resumoLabel}>Total Itens</Text>
-        </View>
-      </View>
+          </S.ResumoValor>
+          <S.ResumoLabel>Total Itens</S.ResumoLabel>
+        </S.ResumoItem>
+      </S.Resumo>
 
       {loading ? (
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Carregando...</Text>
-        </View>
+        <S.LoadingContainer>
+          <S.LoadingText>Carregando...</S.LoadingText>
+        </S.LoadingContainer>
       ) : estoques.length === 0 ? (
-        <View style={styles.emptyContainer}>
+        <S.EmptyContainer>
           <Ionicons name="archive-outline" size={64} color="#ccc" />
-          <Text style={styles.emptyText}>Nenhum produto em estoque</Text>
-          <Text style={styles.emptySubtext}>Cadastre produtos primeiro</Text>
-        </View>
+          <S.EmptyText>Nenhum produto em estoque</S.EmptyText>
+          <S.EmptySubtext>Cadastre produtos primeiro</S.EmptySubtext>
+        </S.EmptyContainer>
       ) : (
-        <FlatList
+        <S.Lista
           data={alertaBaixo ? estoqueBaixo : estoques}
           renderItem={renderEstoque}
-          keyExtractor={(item) => item.produto_id.toString()}
-          style={styles.lista}
+          keyExtractor={(item: Estoque) => item.produto_id.toString()}
         />
       )}
 
@@ -273,21 +256,20 @@ export default function StockScreen() {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              {tipoMovimentacao === 'entrada' ? '📥 Entrada de Estoque' : '📤 Saída de Estoque'}
-            </Text>
+        <S.ModalOverlay>
+          <S.ModalContent>
+            <S.ModalTitle>
+              {tipoMovimentacao === 'entrada' ? 'Entrada de Estoque' : 'Saída de Estoque'}
+            </S.ModalTitle>
 
             {tipoMovimentacao === 'saida' && (
-              <View style={styles.estoqueAtualInfo}>
-                <Text style={styles.estoqueAtualLabel}>Estoque atual:</Text>
-                <Text style={styles.estoqueAtualValor}>{estoqueAtual}</Text>
-              </View>
+              <S.EstoqueAtualInfo>
+                <S.EstoqueAtualLabel>Estoque atual:</S.EstoqueAtualLabel>
+                <S.EstoqueAtualValor>{estoqueAtual}</S.EstoqueAtualValor>
+              </S.EstoqueAtualInfo>
             )}
 
-            <TextInput
-              style={styles.input}
+            <S.Input
               placeholder="Quantidade"
               value={quantidade}
               onChangeText={setQuantidade}
@@ -295,302 +277,25 @@ export default function StockScreen() {
               placeholderTextColor="#999"
             />
 
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
+            <S.ModalButtons>
+              <S.CancelButton
                 onPress={() => {
                   setModalVisible(false);
                   setQuantidade('');
                 }}
               >
-                <Text style={styles.cancelButtonText}>Cancelar</Text>
-              </TouchableOpacity>
+                <S.CancelButtonText>Cancelar</S.CancelButtonText>
+              </S.CancelButton>
 
-              <TouchableOpacity
-                style={[styles.modalButton, styles.saveButton]}
-                onPress={confirmarMovimentacao}
-              >
-                <Text style={styles.saveButtonText}>Confirmar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+              <S.SaveButton onPress={confirmarMovimentacao}>
+                <S.SaveButtonText>Confirmar</S.SaveButtonText>
+              </S.SaveButton>
+            </S.ModalButtons>
+          </S.ModalContent>
+        </S.ModalOverlay>
       </Modal>
-    </View>
+    </S.Container>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  botaoFiltro: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FF9800',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 5,
-  },
-  botaoFiltroTexto: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  resumo: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    padding: 15,
-    marginBottom: 10,
-  },
-  resumoItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  resumoValor: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#4CAF50',
-  },
-  valorAlerta: {
-    color: '#FF9800',
-  },
-  resumoLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
-  },
-  resumoDivider: {
-    width: 1,
-    backgroundColor: '#e0e0e0',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 16,
-    color: '#666',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  emptyText: {
-    fontSize: 18,
-    color: '#666',
-    marginTop: 16,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    color: '#999',
-    marginTop: 8,
-  },
-  lista: {
-    flex: 1,
-    padding: 10,
-  },
-  card: {
-    backgroundColor: '#fff',
-    padding: 15,
-    marginBottom: 10,
-    borderRadius: 10,
-    elevation: 2,
-  },
-  cardAlerta: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#FF9800',
-  },
-  cardContent: {
-    flexDirection: 'row',
-    marginBottom: 10,
-  },
-  produtoFoto: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    marginRight: 12,
-  },
-  produtoSemFoto: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  produtoInfo: {
-    flex: 1,
-  },
-  produtoNome: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  localizacao: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4,
-  },
-  estoqueInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  quantidade: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#4CAF50',
-  },
-  quantidadeBaixa: {
-    color: '#FF9800',
-  },
-  minimoText: {
-    fontSize: 12,
-    color: '#999',
-  },
-  dataText: {
-    fontSize: 10,
-    color: '#999',
-    marginTop: 4,
-  },
-  alertaBadge: {
-    backgroundColor: '#FF9800',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  botoesContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  botaoEntrada: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#4CAF50',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
-    gap: 4,
-    flex: 1,
-    justifyContent: 'center',
-  },
-  botaoSaida: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#2196F3',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
-    gap: 4,
-    flex: 1,
-    justifyContent: 'center',
-  },
-  botaoTexto: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  // Modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 20,
-    width: '90%',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  estoqueAtualInfo: {
-    backgroundColor: '#E3F2FD',
-    padding: 12,
-    borderRadius: 8,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  estoqueAtualLabel: {
-    fontSize: 14,
-    color: '#666',
-  },
-  estoqueAtualValor: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2196F3',
-  },
-  input: {
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 10,
-    fontSize: 16,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  modalButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 25,
-    flex: 1,
-    marginHorizontal: 5,
-  },
-  cancelButton: {
-    backgroundColor: '#f5f5f5',
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  saveButton: {
-    backgroundColor: '#4CAF50',
-  },
-  cancelButtonText: {
-    color: '#666',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-});
+// Estilos movidos para stock.styles.tsx usando styled-components

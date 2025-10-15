@@ -27,6 +27,18 @@ Sistema completo desenvolvido em **React Native + Expo** para gerenciamento de:
 - **Controle de Estoque** com movimentações
 - **Categorias** para organização
 
+### ✨ Refatoração Recente (Nova Arquitetura!)
+
+O projeto passou por uma **refatoração completa** seguindo as melhores práticas profissionais:
+
+- 🎨 **Styled Components** - Estilos separados e organizados
+- 📁 **Estrutura Profissional** - Pastas `components/`, `constants/`, `hooks/`
+- 🎯 **Sistema de Temas** - Cores e espaçamentos centralizados
+- 📝 **Código Limpo** - ~1.520 linhas de StyleSheet removidas
+- 📚 **Documentação Atualizada** - Coverage e guias atualizados
+
+**[Ver detalhes da refatoração →](docs/ORGANIZACAO_CODIGO.md)**
+
 ### 📱 Requisitos Atendidos
 
 - ✅ **Expo + React Native** - Framework mobile cross-platform
@@ -35,6 +47,8 @@ Sistema completo desenvolvido em **React Native + Expo** para gerenciamento de:
 - ✅ **APIs Externas** - ViaCEP, Código de Barras
 - ✅ **Testes Unitários** - Jest + React Native Testing Library
 - ✅ **Documentação Completa** - README, API docs, comentários
+- ✅ **Styled Components** - ✨ Arquitetura profissional
+- ✅ **Código Organizado** - ✨ Padrões de mercado
 - ✅ **Relevância** - Sistema útil para negócios reais
 
 ## ✨ Funcionalidades
@@ -47,23 +61,26 @@ Sistema completo desenvolvido em **React Native + Expo** para gerenciamento de:
 - [x] Integração com ViaCEP para endereços
 
 ### 📦 Módulo de Produtos
-- [ ] Cadastro com foto e código de barras
-- [ ] Vinculação com fornecedores
-- [ ] Categorização
-- [ ] Preço de custo e venda
-- [ ] Estoque mínimo
+- [x] Cadastro com foto e código de barras ✅
+- [x] Vinculação com fornecedores ✅
+- [x] Categorização ✅
+- [x] Preço de custo e venda ✅
+- [x] Estoque mínimo ✅
+- [x] Busca automática por código de barras ✅
 
 ### 📊 Módulo de Estoque
-- [ ] Controle de quantidade
-- [ ] Localização no almoxarifado
-- [ ] Alertas de estoque mínimo
-- [ ] Histórico de movimentações
+- [x] Controle de quantidade ✅
+- [x] Localização no almoxarifado ✅
+- [x] Alertas de estoque mínimo ✅
+- [x] Movimentações de entrada/saída ✅
+- [x] Filtro de estoque baixo ✅
+- [x] Resumo estatístico ✅
 
-### 📝 Módulo de Movimentações
-- [ ] Entrada de produtos
-- [ ] Saída de produtos
-- [ ] Relatórios
-- [ ] Observações e rastreabilidade
+### 🎨 Módulo de Arquitetura (NOVO)
+- [x] Styled Components implementado ✨
+- [x] Sistema de temas centralizado ✨
+- [x] Estilos separados por tela ✨
+- [x] Componentização profissional ✨
 
 ## 🛠️ Tecnologias
 
@@ -71,6 +88,7 @@ Sistema completo desenvolvido em **React Native + Expo** para gerenciamento de:
 - **React Native** - Framework mobile
 - **Expo** - Plataforma de desenvolvimento
 - **TypeScript** - Tipagem estática
+- **Styled Components** - ✨ Estilização de componentes
 - **Expo Router** - Navegação file-based
 - **Expo Image Picker** - Captura de fotos
 - **Ionicons** - Ícones
@@ -264,43 +282,80 @@ test('GET /clientes should return array', async () => {
 
 ```
 Alunos_SENAI/
-├── app/                    # Aplicação React Native
-│   ├── (tabs)/            # Telas com navegação em tabs
-│   │   ├── index.tsx      # Home - Criar clientes
-│   │   ├── about.tsx      # Lista de clientes
-│   │   ├── products.tsx   # Produtos (em desenvolvimento)
-│   │   └── stock.tsx      # Estoque (em desenvolvimento)
-│   └── _layout.tsx        # Layout principal
+├── app/                           # Aplicação React Native
+│   ├── (tabs)/                    # Telas com navegação em tabs
+│   │   ├── index.tsx              # Home - Cadastro de fornecedores
+│   │   ├── index.styles.tsx       # ✨ Estilos da tela index
+│   │   ├── about.tsx              # Lista de fornecedores
+│   │   ├── about.styles.tsx       # ✨ Estilos da tela about
+│   │   ├── categories.tsx         # Gestão de categorias
+│   │   ├── categories.styles.tsx  # ✨ Estilos da tela categories
+│   │   ├── products.tsx           # Gestão de produtos
+│   │   ├── products.styles.tsx    # ✨ Estilos da tela products
+│   │   ├── stock.tsx              # Controle de estoque
+│   │   ├── stock.styles.tsx       # ✨ Estilos da tela stock
+│   │   └── _layout.tsx            # Layout das tabs
+│   ├── services/                  # Serviços de APIs externas
+│   │   ├── codigoBarras.ts        # Integração com API de código de barras
+│   │   └── viaCep.ts              # Integração com ViaCEP
+│   └── _layout.tsx                # Layout principal
 │
-├── api/                   # Backend Node.js
-│   ├── index.js          # API principal
-│   ├── database.sqlite   # Banco de dados
-│   └── package.json      # Dependências da API
+├── components/                    # ✨ Componentes reutilizáveis
+│   └── README.md                  # Guia de uso
 │
-├── assets/               # Imagens e recursos
-│   └── images/
+├── constants/                     # ✨ Constantes e temas
+│   └── theme.ts                   # Cores, espaçamentos, fontes
 │
-├── __tests__/           # Testes automatizados
-│   ├── components/
-│   ├── screens/
-│   └── api/
+├── hooks/                         # ✨ Hooks personalizados
+│   └── README.md                  # Guia de uso
 │
-├── docs/                # Documentação adicional
-│   ├── API.md          # Documentação da API
-│   ├── SETUP.md        # Guia de instalação
-│   └── CONTRIBUTING.md # Guia de contribuição
+├── api/                           # Backend Node.js
+│   ├── index.js                   # API REST principal
+│   ├── database.sqlite            # Banco de dados SQLite
+│   ├── package.json               # Dependências da API
+│   └── reset-db.js                # Script para resetar banco
 │
-├── package.json        # Dependências do app
-├── tsconfig.json      # Configuração TypeScript
-└── README.md          # Este arquivo
+├── __tests__/                     # Testes automatizados
+│   ├── components/                # Testes de componentes
+│   ├── services/                  # Testes de serviços
+│   └── example.test.tsx           # Exemplos de testes
+│
+├── coverage/                      # Relatórios de cobertura de testes
+│   └── lcov-report/               # Documentação HTML interativa
+│
+├── docs/                          # 📚 Documentação completa
+│   ├── API.md                     # Documentação da API REST
+│   ├── APIS_EXTERNAS.md           # ViaCEP e Código de Barras
+│   ├── SETUP.md                   # Guia de instalação
+│   ├── COMO_USAR.md               # Manual de uso
+│   ├── ORGANIZACAO_CODIGO.md      # ⭐ Arquitetura e organização
+│   ├── COVERAGE_ATUALIZADO.md     # ⭐ Relatórios de testes
+│   └── README.md                  # Índice da documentação
+│
+├── assets/                        # Recursos do app
+│   └── images/                    # Ícones e imagens
+│
+├── package.json                   # Dependências do projeto
+├── tsconfig.json                  # Configuração TypeScript
+├── jest.config.js                 # Configuração de testes
+└── README.md                      # Este arquivo
 ```
 
 ## 📚 Documentação
 
-- [📖 Documentação da API](docs/API.md)
-- [🚀 Guia de Instalação](docs/SETUP.md)
-- [🧪 Guia de Testes](docs/TESTING.md)
-- [🤝 Como Contribuir](docs/CONTRIBUTING.md)
+### 📖 Documentação Completa
+Toda a documentação está organizada na pasta **[docs/](docs/)** com um índice completo.
+
+**Principais Documentos:**
+- [📖 Índice Completo](docs/README.md) - Navegue por toda documentação
+- [🏗️ Organização do Código](docs/ORGANIZACAO_CODIGO.md) ⭐ **NOVO** - Arquitetura e Styled Components
+- [📊 Coverage Atualizado](docs/COVERAGE_ATUALIZADO.md) ⭐ **NOVO** - Relatórios de testes
+- [🚀 Como Usar](docs/COMO_USAR.md) - Manual completo do sistema
+- [🔧 Setup](docs/SETUP.md) - Guia de instalação passo a passo
+- [📡 API](docs/API.md) - Documentação da API REST
+- [🌐 APIs Externas](docs/APIS_EXTERNAS.md) - ViaCEP e Código de Barras
+- [🧪 Testes](docs/GUIA_RAPIDO_TESTES.md) - Como executar testes
+- [🎤 Demonstração](docs/DEMONSTRACAO.md) - Roteiro de apresentação
 
 ## 👨‍💻 Desenvolvimento
 

@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { Alert, FlatList, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Modal } from 'react-native';
+import * as S from './about.styles';
 
 // Interface para o fornecedor
 interface Cliente {
@@ -229,98 +230,90 @@ export default function AboutScreen() {
 
   // Função para renderizar cada item da lista
   const renderCliente = ({ item }: { item: Cliente }) => (
-    <View style={[styles.clienteCard, !item.ativo && styles.clienteInativo]}>
-      <View style={styles.clienteHeader}>
+    <S.ClienteCard inativo={!item.ativo}>
+      <S.ClienteHeader>
         {item.foto ? (
-          <Image source={{ uri: item.foto }} style={styles.clienteFoto} />
+          <S.ClienteFoto source={{ uri: item.foto }} />
         ) : (
-          <View style={styles.clienteSemFoto}>
+          <S.ClienteSemFoto>
             <Ionicons name="person" size={100} color="#ccc" />
-          </View>
+          </S.ClienteSemFoto>
         )}
-        <View style={styles.clienteInfo}>
-          <Text style={[styles.clienteNome, !item.ativo && styles.textoInativo]}>{item.nome}</Text>
-          <Text style={[styles.clienteEmail, !item.ativo && styles.textoInativo]}>{item.email}</Text>
+        <S.ClienteInfo>
+          <S.ClienteNome inativo={!item.ativo}>{item.nome}</S.ClienteNome>
+          <S.ClienteEmail inativo={!item.ativo}>{item.email}</S.ClienteEmail>
           {item.telefone && (
-            <Text style={[styles.clienteTelefone, !item.ativo && styles.textoInativo]}>{item.telefone}</Text>
+            <S.ClienteTelefone inativo={!item.ativo}>{item.telefone}</S.ClienteTelefone>
           )}
-        </View>
-        <View style={[styles.statusBadge, { backgroundColor: item.ativo ? '#4CAF50' : '#F44336' }]}>
-          <Text style={styles.statusText}>{item.ativo ? 'Ativo' : 'Inativo'}</Text>
-        </View>
-      </View>
+        </S.ClienteInfo>
+        <S.StatusBadge ativo={item.ativo}>
+          <S.StatusText>{item.ativo ? 'Ativo' : 'Inativo'}</S.StatusText>
+        </S.StatusBadge>
+      </S.ClienteHeader>
       
-      <View style={styles.botoesContainer}>
-        <TouchableOpacity 
-          style={styles.botaoEditar}
-          onPress={() => editarCliente(item.codigo)}
-        >
+      <S.BotoesContainer>
+        <S.BotaoEditar onPress={() => editarCliente(item.codigo)}>
           <Ionicons name="pencil" size={12} color="#fff" />
-          <Text style={styles.botaoTexto}>Editar</Text>
-        </TouchableOpacity>
+          <S.BotaoTexto>Editar</S.BotaoTexto>
+        </S.BotaoEditar>
         
-        <TouchableOpacity 
-          style={[styles.botaoStatus, { backgroundColor: item.ativo ? '#FF9800' : '#4CAF50' }]}
+        <S.BotaoStatus 
+          ativo={item.ativo}
           onPress={() => alternarStatusCliente(item.codigo, item.ativo)}
         >
           <Ionicons name={item.ativo ? "pause" : "play"} size={12} color="#fff" />
-          <Text style={styles.botaoTexto}>{item.ativo ? 'Desativar' : 'Ativar'}</Text>
-        </TouchableOpacity>
+          <S.BotaoTexto>{item.ativo ? 'Desativar' : 'Ativar'}</S.BotaoTexto>
+        </S.BotaoStatus>
         
-        <TouchableOpacity 
-          style={styles.botaoTeste}
-          onPress={() => excluirCliente(item.codigo, item.nome)}
-        >
+        <S.BotaoTeste onPress={() => excluirCliente(item.codigo, item.nome)}>
           <Ionicons name="trash" size={12} color="#fff" />
-          <Text style={styles.botaoTexto}>Deletar</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+          <S.BotaoTexto>Deletar</S.BotaoTexto>
+        </S.BotaoTeste>
+      </S.BotoesContainer>
+    </S.ClienteCard>
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Lista de Fornecedores</Text>
-        <View style={styles.headerButtons}>
-          <TouchableOpacity style={styles.botaoAdicionar} onPress={() => setModalVisible(true)}>
-            <Text style={styles.botaoAdicionarTexto}>+ Adicionar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.botaoAtualizar} onPress={buscarClientes}>
-            <Text style={styles.botaoAtualizarTexto}>🔄</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+    <S.Container>
+      <S.Header>
+        <S.Title>Lista de Fornecedores</S.Title>
+        <S.HeaderButtons>
+          <S.BotaoAdicionar onPress={() => setModalVisible(true)}>
+            <S.BotaoAdicionarTexto>+ Adicionar</S.BotaoAdicionarTexto>
+          </S.BotaoAdicionar>
+          <S.BotaoAtualizar onPress={buscarClientes}>
+            <S.BotaoAtualizarTexto>Atualizar</S.BotaoAtualizarTexto>
+          </S.BotaoAtualizar>
+        </S.HeaderButtons>
+      </S.Header>
 
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
+      <S.SearchContainer>
+        <S.SearchInput
           placeholder="Pesquisar fornecedores..."
           value={pesquisa}
           onChangeText={filtrarClientes}
           placeholderTextColor="#999"
         />
-      </View>
+      </S.SearchContainer>
 
       {loading ? (
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Carregando fornecedores...</Text>
-        </View>
+        <S.LoadingContainer>
+          <S.LoadingText>Carregando fornecedores...</S.LoadingText>
+        </S.LoadingContainer>
       ) : clientesFiltrados.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>
+        <S.EmptyContainer>
+          <S.EmptyText>
             {pesquisa ? 'Nenhum fornecedor encontrado para a pesquisa' : 'Nenhum fornecedor encontrado'}
-          </Text>
-          <Text style={styles.emptySubtext}>
+          </S.EmptyText>
+          <S.EmptySubtext>
             {pesquisa ? 'Tente uma pesquisa diferente' : 'Verifique se a API está rodando ou adicione alguns fornecedores'}
-          </Text>
-        </View>
+          </S.EmptySubtext>
+        </S.EmptyContainer>
       ) : (
-        <FlatList
+        <S.Lista
           data={clientesFiltrados}
           renderItem={renderCliente}
-          keyExtractor={(item) => item.codigo.toString()}
-          style={styles.lista}
+          keyExtractor={(item: Cliente) => item.codigo.toString()}
           showsVerticalScrollIndicator={false}
         />
       )}
@@ -332,391 +325,70 @@ export default function AboutScreen() {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
+        <S.ModalOverlay>
+          <S.ModalContent>
+            <S.ModalTitle>
               {clienteEditando ? 'Editar Fornecedor' : 'Adicionar Novo Fornecedor'}
-            </Text>
+            </S.ModalTitle>
             
-            <ScrollView style={styles.modalForm}>
-              <TextInput
-                style={styles.input}
+            <S.ModalForm>
+              <S.Input
                 placeholder="Nome *"
                 value={novoCliente.nome}
-                onChangeText={(text) => setNovoCliente({...novoCliente, nome: text})}
+                onChangeText={(text: string) => setNovoCliente({...novoCliente, nome: text})}
                 placeholderTextColor="#999"
               />
               
-              <TextInput
-                style={styles.input}
+              <S.Input
                 placeholder="Email *"
                 value={novoCliente.email}
-                onChangeText={(text) => setNovoCliente({...novoCliente, email: text})}
+                onChangeText={(text: string) => setNovoCliente({...novoCliente, email: text})}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 placeholderTextColor="#999"
               />
               
-              <TextInput
-                style={styles.input}
+              <S.Input
                 placeholder="Telefone"
                 value={novoCliente.telefone}
-                onChangeText={(text) => setNovoCliente({...novoCliente, telefone: text})}
+                onChangeText={(text: string) => setNovoCliente({...novoCliente, telefone: text})}
                 keyboardType="phone-pad"
                 placeholderTextColor="#999"
               />
               
-              <View style={styles.checkboxContainer}>
-                <TouchableOpacity
-                  style={[styles.checkbox, novoCliente.ativo && styles.checkboxChecked]}
+              <S.CheckboxContainer>
+<S.Checkbox
+                  checked={novoCliente.ativo}
                   onPress={() => setNovoCliente({...novoCliente, ativo: !novoCliente.ativo})}
                 >
-                  <Text style={styles.checkboxText}>✓</Text>
-                </TouchableOpacity>
-                <Text style={styles.checkboxLabel}>Fornecedor ativo</Text>
-              </View>
-            </ScrollView>
+                  {novoCliente.ativo && <S.CheckboxText>✓</S.CheckboxText>}
+                </S.Checkbox>
+                <S.CheckboxLabel>Fornecedor ativo</S.CheckboxLabel>
+              </S.CheckboxContainer>
+            </S.ModalForm>
             
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
+            <S.ModalButtons>
+              <S.CancelButton
                 onPress={() => {
                   setModalVisible(false);
                   setNovoCliente({ nome: '', email: '', telefone: '', ativo: true, foto: '' });
                   setClienteEditando(null);
                 }}
               >
-                <Text style={styles.cancelButtonText}>Cancelar</Text>
-              </TouchableOpacity>
+                <S.CancelButtonText>Cancelar</S.CancelButtonText>
+              </S.CancelButton>
               
-              <TouchableOpacity
-                style={[styles.modalButton, styles.saveButton]}
-                onPress={adicionarCliente}
-              >
-                <Text style={styles.saveButtonText}>
+              <S.SaveButton onPress={adicionarCliente}>
+                <S.SaveButtonText>
                   {clienteEditando ? 'Atualizar' : 'Salvar'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+                </S.SaveButtonText>
+              </S.SaveButton>
+            </S.ModalButtons>
+          </S.ModalContent>
+        </S.ModalOverlay>
       </Modal>
-    </View>
+    </S.Container>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    flex: 1,
-  },
-  headerButtons: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  botaoAdicionar: {
-    backgroundColor: '#4CAF50',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  botaoAdicionarTexto: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  botaoAtualizar: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  botaoAtualizarTexto: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  searchContainer: {
-    padding: 15,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  searchInput: {
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 25,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 16,
-    color: '#666',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  emptyText: {
-    fontSize: 18,
-    color: '#666',
-    marginBottom: 10,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    color: '#999',
-    textAlign: 'center',
-  },
-  lista: {
-    flex: 1,
-    padding: 10,
-  },
-  clienteCard: {
-    backgroundColor: '#fff',
-    padding: 15,
-    marginBottom: 15,
-    marginHorizontal: 10,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
-    elevation: 5,
-  },
-  clienteInativo: {
-    backgroundColor: '#f5f5f5',
-    opacity: 0.7,
-  },
-  textoInativo: {
-    color: '#999',
-  },
-  clienteHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 15,
-  },
-  clienteFoto: {
-    width: 200,
-    height: 200,
-    borderRadius: 8,
-    marginRight: 10,
-    borderWidth: 2,
-    borderColor: '#4CAF50',
-  },
-  clienteSemFoto: {
-    width: 200,
-    height: 200,
-    borderRadius: 8,
-    marginRight: 10,
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  clienteInfo: {
-    flex: 1,
-    marginRight: 10,
-  },
-  clienteNome: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 2,
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-    alignSelf: 'flex-start',
-  },
-  statusText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-  clienteEmail: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 2,
-  },
-  clienteTelefone: {
-    fontSize: 12,
-    color: '#666',
-  },
-  botoesContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: 150,
-    gap: 2,
-  },
-  botaoEditar: {
-    backgroundColor: '#2196F3',
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: 5,
-    minWidth: 40,
-    height: 22,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 3,
-  },
-  botaoStatus: {
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: 5,
-    minWidth: 40,
-    height: 22,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 3,
-  },
-  botaoTeste: {
-    backgroundColor: '#F44336',
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: 5,
-    minWidth: 40,
-    height: 22,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 3,
-  },
-  botaoTexto: {
-    color: '#fff',
-    fontSize: 8,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  // Estilos do Modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 20,
-    width: '90%',
-    maxHeight: '80%',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  modalForm: {
-    maxHeight: 300,
-  },
-  input: {
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 10,
-    fontSize: 16,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderWidth: 2,
-    borderColor: '#ddd',
-    borderRadius: 4,
-    marginRight: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxChecked: {
-    backgroundColor: '#4CAF50',
-    borderColor: '#4CAF50',
-  },
-  checkboxText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  checkboxLabel: {
-    fontSize: 16,
-    color: '#333',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-  },
-  modalButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 25,
-    flex: 1,
-    marginHorizontal: 5,
-  },
-  cancelButton: {
-    backgroundColor: '#f5f5f5',
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  saveButton: {
-    backgroundColor: '#4CAF50',
-  },
-  cancelButtonText: {
-    color: '#666',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-});
+// Estilos movidos para about.styles.tsx usando styled-components

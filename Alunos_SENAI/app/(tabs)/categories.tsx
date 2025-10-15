@@ -1,17 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import {
-  Alert,
-  FlatList,
-  Modal,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Alert, Modal } from 'react-native';
+import * as S from './categories.styles';
 
 // Interface para categoria
 interface Categoria {
@@ -159,77 +150,62 @@ export default function CategoriesScreen() {
   );
 
   const renderCategoria = ({ item }: { item: Categoria }) => (
-    <View style={[styles.card, !item.ativo && styles.cardInativo]}>
-      <View style={styles.cardHeader}>
-        <View style={styles.cardInfo}>
-          <Text style={[styles.cardNome, !item.ativo && styles.textoInativo]}>
+    <S.Card inativo={!item.ativo}>
+      <S.CardHeader>
+        <S.CardInfo>
+          <S.CardNome inativo={!item.ativo}>
             {item.nome}
-          </Text>
+          </S.CardNome>
           {item.descricao && (
-            <Text style={[styles.cardDescricao, !item.ativo && styles.textoInativo]}>
+            <S.CardDescricao inativo={!item.ativo}>
               {item.descricao}
-            </Text>
+            </S.CardDescricao>
           )}
-        </View>
-        <View
-          style={[
-            styles.statusBadge,
-            { backgroundColor: item.ativo ? '#4CAF50' : '#F44336' },
-          ]}
-        >
-          <Text style={styles.statusText}>{item.ativo ? 'Ativa' : 'Inativa'}</Text>
-        </View>
-      </View>
+        </S.CardInfo>
+        <S.StatusBadge ativo={item.ativo}>
+          <S.StatusText>{item.ativo ? 'Ativa' : 'Inativa'}</S.StatusText>
+        </S.StatusBadge>
+      </S.CardHeader>
 
-      <View style={styles.botoesContainer}>
-        <TouchableOpacity
-          style={styles.botaoEditar}
-          onPress={() => editarCategoria(item.codigo)}
-        >
+      <S.BotoesContainer>
+        <S.BotaoEditar onPress={() => editarCategoria(item.codigo)}>
           <Ionicons name="pencil" size={14} color="#fff" />
-          <Text style={styles.botaoTexto}>Editar</Text>
-        </TouchableOpacity>
+          <S.BotaoTexto>Editar</S.BotaoTexto>
+        </S.BotaoEditar>
 
-        <TouchableOpacity
-          style={styles.botaoDeletar}
-          onPress={() => deletarCategoria(item.codigo, item.nome)}
-        >
+        <S.BotaoDeletar onPress={() => deletarCategoria(item.codigo, item.nome)}>
           <Ionicons name="trash" size={14} color="#fff" />
-          <Text style={styles.botaoTexto}>Excluir</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+          <S.BotaoTexto>Excluir</S.BotaoTexto>
+        </S.BotaoDeletar>
+      </S.BotoesContainer>
+    </S.Card>
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Categorias</Text>
-        <TouchableOpacity
-          style={styles.botaoAdicionar}
-          onPress={() => setModalVisible(true)}
-        >
+    <S.Container>
+      <S.Header>
+        <S.Title>Categorias</S.Title>
+        <S.BotaoAdicionar onPress={() => setModalVisible(true)}>
           <Ionicons name="add-circle" size={24} color="#fff" />
-          <Text style={styles.botaoAdicionarTexto}>Nova</Text>
-        </TouchableOpacity>
-      </View>
+          <S.BotaoAdicionarTexto>Nova</S.BotaoAdicionarTexto>
+        </S.BotaoAdicionar>
+      </S.Header>
 
       {loading ? (
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Carregando...</Text>
-        </View>
+        <S.LoadingContainer>
+          <S.LoadingText>Carregando...</S.LoadingText>
+        </S.LoadingContainer>
       ) : categorias.length === 0 ? (
-        <View style={styles.emptyContainer}>
+        <S.EmptyContainer>
           <Ionicons name="folder-open-outline" size={64} color="#ccc" />
-          <Text style={styles.emptyText}>Nenhuma categoria cadastrada</Text>
-          <Text style={styles.emptySubtext}>Crie uma categoria para começar</Text>
-        </View>
+          <S.EmptyText>Nenhuma categoria cadastrada</S.EmptyText>
+          <S.EmptySubtext>Crie uma categoria para começar</S.EmptySubtext>
+        </S.EmptyContainer>
       ) : (
-        <FlatList
+        <S.Lista
           data={categorias}
           renderItem={renderCategoria}
-          keyExtractor={(item) => item.codigo.toString()}
-          style={styles.lista}
+          keyExtractor={(item: Categoria) => item.codigo.toString()}
           showsVerticalScrollIndicator={false}
         />
       )}
@@ -241,28 +217,26 @@ export default function CategoriesScreen() {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
+        <S.ModalOverlay>
+          <S.ModalContent>
+            <S.ModalTitle>
               {categoriaEditando ? 'Editar Categoria' : 'Nova Categoria'}
-            </Text>
+            </S.ModalTitle>
 
-            <ScrollView style={styles.modalForm}>
-              <TextInput
-                style={styles.input}
+            <S.ModalForm>
+              <S.Input
                 placeholder="Nome da Categoria *"
                 value={novaCategoria.nome}
-                onChangeText={(text) =>
+                onChangeText={(text: string) =>
                   setNovaCategoria({ ...novaCategoria, nome: text })
                 }
                 placeholderTextColor="#999"
               />
 
-              <TextInput
-                style={[styles.input, styles.inputMultiline]}
+              <S.InputMultiline
                 placeholder="Descrição (opcional)"
                 value={novaCategoria.descricao}
-                onChangeText={(text) =>
+                onChangeText={(text: string) =>
                   setNovaCategoria({ ...novaCategoria, descricao: text })
                 }
                 multiline
@@ -270,282 +244,40 @@ export default function CategoriesScreen() {
                 placeholderTextColor="#999"
               />
 
-              <View style={styles.checkboxContainer}>
-                <TouchableOpacity
-                  style={[
-                    styles.checkbox,
-                    novaCategoria.ativo && styles.checkboxChecked,
-                  ]}
+              <S.CheckboxContainer>
+                <S.Checkbox
+                  checked={novaCategoria.ativo}
                   onPress={() =>
                     setNovaCategoria({ ...novaCategoria, ativo: !novaCategoria.ativo })
                   }
                 >
-                  <Text style={styles.checkboxText}>✓</Text>
-                </TouchableOpacity>
-                <Text style={styles.checkboxLabel}>Categoria ativa</Text>
-              </View>
-            </ScrollView>
+                  {novaCategoria.ativo && <S.CheckboxText>✓</S.CheckboxText>}
+                </S.Checkbox>
+                <S.CheckboxLabel>Categoria ativa</S.CheckboxLabel>
+              </S.CheckboxContainer>
+            </S.ModalForm>
 
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
+            <S.ModalButtons>
+              <S.CancelButton
                 onPress={() => {
                   setModalVisible(false);
                   setNovaCategoria({ nome: '', descricao: '', ativo: true });
                   setCategoriaEditando(null);
                 }}
               >
-                <Text style={styles.cancelButtonText}>Cancelar</Text>
-              </TouchableOpacity>
+                <S.CancelButtonText>Cancelar</S.CancelButtonText>
+              </S.CancelButton>
 
-              <TouchableOpacity
-                style={[styles.modalButton, styles.saveButton]}
-                onPress={salvarCategoria}
-              >
-                <Text style={styles.saveButtonText}>Salvar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+              <S.SaveButton onPress={salvarCategoria}>
+                <S.SaveButtonText>Salvar</S.SaveButtonText>
+              </S.SaveButton>
+            </S.ModalButtons>
+          </S.ModalContent>
+        </S.ModalOverlay>
       </Modal>
-    </View>
+    </S.Container>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  botaoAdicionar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#4CAF50',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 5,
-  },
-  botaoAdicionarTexto: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 16,
-    color: '#666',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  emptyText: {
-    fontSize: 18,
-    color: '#666',
-    marginTop: 16,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    color: '#999',
-    marginTop: 8,
-  },
-  lista: {
-    flex: 1,
-    padding: 10,
-  },
-  card: {
-    backgroundColor: '#fff',
-    padding: 15,
-    marginBottom: 10,
-    borderRadius: 10,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  cardInativo: {
-    backgroundColor: '#f5f5f5',
-    opacity: 0.7,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  cardInfo: {
-    flex: 1,
-    marginRight: 10,
-  },
-  cardNome: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  cardDescricao: {
-    fontSize: 14,
-    color: '#666',
-  },
-  textoInativo: {
-    color: '#999',
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
-    alignSelf: 'flex-start',
-  },
-  statusText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-  botoesContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  botaoEditar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#2196F3',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-    gap: 4,
-  },
-  botaoDeletar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F44336',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-    gap: 4,
-  },
-  botaoTexto: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  // Modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 20,
-    width: '90%',
-    maxHeight: '80%',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  modalForm: {
-    maxHeight: 300,
-  },
-  input: {
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 10,
-    fontSize: 16,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  inputMultiline: {
-    height: 80,
-    textAlignVertical: 'top',
-  },
-  checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderWidth: 2,
-    borderColor: '#ddd',
-    borderRadius: 4,
-    marginRight: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxChecked: {
-    backgroundColor: '#4CAF50',
-    borderColor: '#4CAF50',
-  },
-  checkboxText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  checkboxLabel: {
-    fontSize: 16,
-    color: '#333',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-  },
-  modalButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 25,
-    flex: 1,
-    marginHorizontal: 5,
-  },
-  cancelButton: {
-    backgroundColor: '#f5f5f5',
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  saveButton: {
-    backgroundColor: '#4CAF50',
-  },
-  cancelButtonText: {
-    color: '#666',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-});
+// Estilos movidos para categories.styles.tsx usando styled-components
 

@@ -227,8 +227,8 @@ async function start() {
   try {
     await sequelize.authenticate();
     await sequelize.sync({ force: true }); // TEMPORÁRIO: Recria banco limpo
-    console.log('✅ Banco conectado e modelos sincronizados.');
-    console.log('📦 Tabelas criadas: clientes, categorias, produtos, estoque, movimentacoes');
+    console.log('Banco conectado e modelos sincronizados.');
+    console.log('Tabelas criadas: clientes, categorias, produtos, estoque, movimentacoes');
 
     // Rotas
 
@@ -319,28 +319,28 @@ async function start() {
 
     // Deletar cliente
     app.delete('/clientes/:codigo', async (req, res) => {
-      console.log('🔥🔥🔥 ROTA DELETE CHAMADA 🔥🔥🔥');
-      console.log('📋 Código recebido:', req.params.codigo);
-      console.log('⏰ Timestamp:', new Date().toISOString());
+      console.log('ROTA DELETE CHAMADA');
+      console.log('Código recebido:', req.params.codigo);
+      console.log('Timestamp:', new Date().toISOString());
       
       try {
-        console.log('🔍 Buscando cliente no banco...');
+        console.log('Buscando cliente no banco...');
         const cliente = await Cliente.findByPk(req.params.codigo);
         
         if (!cliente) {
-          console.log('❌ Cliente não encontrado');
+          console.log('Cliente não encontrado');
           return res.status(404).json({ error: 'Cliente não encontrado' });
         }
         
-        console.log('✅ Cliente encontrado:', cliente.dataValues);
-        console.log('🗑️ Iniciando exclusão...');
+        console.log('Cliente encontrado:', cliente.dataValues);
+        console.log('Iniciando exclusão...');
         
         await cliente.destroy();
         
-        console.log('🎉 Cliente excluído com sucesso!');
+        console.log('Cliente excluído com sucesso!');
         res.json({ message: 'Cliente removido' });
       } catch (err) {
-        console.error('💥 ERRO na exclusão:', err);
+        console.error('ERRO na exclusão:', err);
         res.status(500).json({ error: 'Erro ao remover cliente' });
       }
     });
@@ -399,20 +399,20 @@ async function start() {
     // Deletar categoria
     app.delete('/categorias/:codigo', async (req, res) => {
       try {
-        console.log('🗑️ DELETE categoria:', req.params.codigo);
+        console.log('DELETE categoria:', req.params.codigo);
         const categoria = await Categoria.findByPk(req.params.codigo);
         if (!categoria) {
-          console.log('❌ Categoria não encontrada');
+          console.log('Categoria não encontrada');
           return res.status(404).json({ error: 'Categoria não encontrada' });
         }
         
-        console.log('📁 Deletando categoria:', categoria.nome);
+        console.log('Deletando categoria:', categoria.nome);
         await categoria.destroy();
         
-        console.log('✅ Categoria deletada com sucesso!');
+        console.log('Categoria deletada com sucesso!');
         res.json({ message: 'Categoria removida' });
       } catch (err) {
-        console.error('❌ Erro ao deletar categoria:', err);
+        console.error('Erro ao deletar categoria:', err);
         res.status(500).json({ error: 'Erro ao remover categoria' });
       }
     });
@@ -484,29 +484,29 @@ async function start() {
     // Deletar produto
     app.delete('/produtos/:codigo', async (req, res) => {
       try {
-        console.log('🗑️ DELETE produto:', req.params.codigo);
+        console.log('DELETE produto:', req.params.codigo);
         const produto = await Produto.findByPk(req.params.codigo);
         if (!produto) {
-          console.log('❌ Produto não encontrado');
+          console.log('Produto não encontrado');
           return res.status(404).json({ error: 'Produto não encontrado' });
         }
         
         // Deletar estoque associado primeiro
-        console.log('🗄️ Deletando estoque do produto...');
+        console.log('Deletando estoque do produto...');
         await Estoque.destroy({ where: { produto_id: req.params.codigo } });
         
         // Deletar movimentações associadas
-        console.log('📝 Deletando movimentações do produto...');
+        console.log('Deletando movimentações do produto...');
         await Movimentacao.destroy({ where: { produto_id: req.params.codigo } });
         
         // Deletar produto
-        console.log('📦 Deletando produto...');
+        console.log('Deletando produto...');
         await produto.destroy();
         
-        console.log('✅ Produto deletado com sucesso!');
+        console.log('Produto deletado com sucesso!');
         res.json({ message: 'Produto removido' });
       } catch (err) {
-        console.error('❌ Erro ao deletar produto:', err);
+        console.error('Erro ao deletar produto:', err);
         res.status(500).json({ error: 'Erro ao remover produto' });
       }
     });
