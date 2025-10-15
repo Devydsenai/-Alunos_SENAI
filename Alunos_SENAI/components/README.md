@@ -136,3 +136,4 @@ import { Button } from '@/components/Button';
 
 📖 **Documentação completa**: Veja `ORGANIZACAO_CODIGO.md` na raiz do projeto
 
+
