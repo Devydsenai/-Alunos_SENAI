@@ -2,19 +2,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useState } from 'react';
-import {
-    Alert,
-    FlatList,
-    Image,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from 'react-native';
+import { Alert, Modal, ScrollView } from 'react-native';
 import { buscarProdutoPorCodigoBarras } from '../services/codigoBarras';
+import * as S from './products.styles';
 
 interface Categoria {
   codigo: number;
@@ -319,97 +309,82 @@ export default function ProductsScreen() {
   );
 
   const renderProduto = ({ item }: { item: Produto }) => (
-    <View style={[styles.card, !item.ativo && styles.cardInativo]}>
-      <View style={styles.cardContent}>
+    <S.Card inativo={!item.ativo}>
+      <S.CardContent>
         {item.foto ? (
-          <Image source={{ uri: item.foto }} style={styles.produtoFoto} />
+          <S.ProdutoFoto source={{ uri: item.foto }} />
         ) : (
-          <View style={styles.produtoSemFoto}>
+          <S.ProdutoSemFoto>
             <Ionicons name="cube-outline" size={40} color="#ccc" />
-          </View>
+          </S.ProdutoSemFoto>
         )}
 
-        <View style={styles.produtoInfo}>
-          <Text style={[styles.produtoNome, !item.ativo && styles.textoInativo]}>
+        <S.ProdutoInfo>
+          <S.ProdutoNome inativo={!item.ativo}>
             {item.nome}
-          </Text>
+          </S.ProdutoNome>
           {item.descricao && (
-            <Text style={[styles.produtoDescricao, !item.ativo && styles.textoInativo]}>
+            <S.ProdutoDescricao inativo={!item.ativo}>
               {item.descricao}
-            </Text>
+            </S.ProdutoDescricao>
           )}
           {item.categoria && (
-            <Text style={styles.produtoCategoria}>📁 {item.categoria.nome}</Text>
+            <S.ProdutoCategoria>📁 {item.categoria.nome}</S.ProdutoCategoria>
           )}
           {item.fornecedor && (
-            <Text style={styles.produtoFornecedor}>🏢 {item.fornecedor.nome}</Text>
+            <S.ProdutoFornecedor>🏢 {item.fornecedor.nome}</S.ProdutoFornecedor>
           )}
-          <View style={styles.precosContainer}>
-            <Text style={styles.preco}>💰 R$ {item.preco_venda?.toFixed(2)}</Text>
+          <S.PrecosContainer>
+            <S.Preco>💰 R$ {item.preco_venda?.toFixed(2)}</S.Preco>
             {item.codigo_barras && (
-              <Text style={styles.codigoBarras}>📊 {item.codigo_barras}</Text>
+              <S.CodigoBarras>📊 {item.codigo_barras}</S.CodigoBarras>
             )}
-          </View>
-        </View>
+          </S.PrecosContainer>
+        </S.ProdutoInfo>
 
-        <View
-          style={[
-            styles.statusBadge,
-            { backgroundColor: item.ativo ? '#4CAF50' : '#F44336' },
-          ]}
-        >
-          <Text style={styles.statusText}>{item.ativo ? 'Ativo' : 'Inativo'}</Text>
-        </View>
-      </View>
+        <S.StatusBadge ativo={item.ativo}>
+          <S.StatusText>{item.ativo ? 'Ativo' : 'Inativo'}</S.StatusText>
+        </S.StatusBadge>
+      </S.CardContent>
 
-      <View style={styles.botoesContainer}>
-        <TouchableOpacity
-          style={styles.botaoEditar}
-          onPress={() => editarProduto(item.codigo)}
-        >
+      <S.BotoesContainer>
+        <S.BotaoEditar onPress={() => editarProduto(item.codigo)}>
           <Ionicons name="pencil" size={14} color="#fff" />
-          <Text style={styles.botaoTexto}>Editar</Text>
-        </TouchableOpacity>
+          <S.BotaoTexto>Editar</S.BotaoTexto>
+        </S.BotaoEditar>
 
-        <TouchableOpacity
-          style={styles.botaoDeletar}
-          onPress={() => deletarProduto(item.codigo, item.nome)}
-        >
+        <S.BotaoDeletar onPress={() => deletarProduto(item.codigo, item.nome)}>
           <Ionicons name="trash" size={14} color="#fff" />
-          <Text style={styles.botaoTexto}>Excluir</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+          <S.BotaoTexto>Excluir</S.BotaoTexto>
+        </S.BotaoDeletar>
+      </S.BotoesContainer>
+    </S.Card>
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Produtos</Text>
-        <TouchableOpacity
-          style={styles.botaoAdicionar}
-          onPress={() => setModalVisible(true)}
-        >
+    <S.Container>
+      <S.Header>
+        <S.Title>Produtos</S.Title>
+        <S.BotaoAdicionar onPress={() => setModalVisible(true)}>
           <Ionicons name="add-circle" size={24} color="#fff" />
-          <Text style={styles.botaoAdicionarTexto}>Novo</Text>
-        </TouchableOpacity>
-      </View>
+          <S.BotaoAdicionarTexto>Novo</S.BotaoAdicionarTexto>
+        </S.BotaoAdicionar>
+      </S.Header>
 
       {loading ? (
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Carregando...</Text>
-        </View>
+        <S.LoadingContainer>
+          <S.LoadingText>Carregando...</S.LoadingText>
+        </S.LoadingContainer>
       ) : produtos.length === 0 ? (
-        <View style={styles.emptyContainer}>
+        <S.EmptyContainer>
           <Ionicons name="cube-outline" size={64} color="#ccc" />
-          <Text style={styles.emptyText}>Nenhum produto cadastrado</Text>
-        </View>
+          <S.EmptyText>Nenhum produto cadastrado</S.EmptyText>
+        </S.EmptyContainer>
       ) : (
-        <FlatList
+        <S.Lista
           data={produtos}
           renderItem={renderProduto}
-          keyExtractor={(item) => item.codigo.toString()}
-          style={styles.lista}
+          keyExtractor={(item: Produto) => item.codigo.toString()}
         />
       )}
 
@@ -420,166 +395,141 @@ export default function ProductsScreen() {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
+        <S.ModalOverlay>
+          <S.ModalContent>
+            <S.ModalTitle>
               {produtoEditando ? 'Editar Produto' : 'Novo Produto'}
-            </Text>
+            </S.ModalTitle>
 
-            <ScrollView style={styles.modalForm}>
+            <S.ModalForm>
               {/* Foto */}
-              <View style={styles.fotoContainer}>
+              <S.FotoContainer>
                 {novoProduto.foto ? (
-                  <Image source={{ uri: novoProduto.foto }} style={styles.fotoPreview} />
+                  <S.FotoPreview source={{ uri: novoProduto.foto }} />
                 ) : (
-                  <View style={styles.semFoto}>
+                  <S.SemFoto>
                     <Ionicons name="cube-outline" size={60} color="#ccc" />
-                  </View>
+                  </S.SemFoto>
                 )}
-                <View style={styles.fotoBotoes}>
-                  <TouchableOpacity style={styles.botaoFoto} onPress={tirarFoto}>
+                <S.FotoBotoes>
+                  <S.BotaoFoto onPress={tirarFoto}>
                     <Ionicons name="camera" size={18} color="#fff" />
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.botaoGaleria} onPress={selecionarImagem}>
+                  </S.BotaoFoto>
+                  <S.BotaoGaleria onPress={selecionarImagem}>
                     <Ionicons name="images" size={18} color="#fff" />
-                  </TouchableOpacity>
-                </View>
-              </View>
+                  </S.BotaoGaleria>
+                </S.FotoBotoes>
+              </S.FotoContainer>
 
-              <TextInput
-                style={styles.input}
+              <S.Input
                 placeholder="Nome do Produto *"
                 value={novoProduto.nome}
-                onChangeText={(text) => setNovoProduto({ ...novoProduto, nome: text })}
+                onChangeText={(text: string) => setNovoProduto({ ...novoProduto, nome: text })}
                 placeholderTextColor="#999"
               />
 
-              <TextInput
-                style={[styles.input, styles.inputMultiline]}
+              <S.InputMultiline
                 placeholder="Descrição"
                 value={novoProduto.descricao}
-                onChangeText={(text) => setNovoProduto({ ...novoProduto, descricao: text })}
+                onChangeText={(text: string) => setNovoProduto({ ...novoProduto, descricao: text })}
                 multiline
                 numberOfLines={2}
                 placeholderTextColor="#999"
               />
 
               {/* Código de Barras */}
-              <View style={styles.codigoBarrasContainer}>
-                <TextInput
-                  style={[styles.input, { flex: 1, marginBottom: 0 }]}
+              <S.CodigoBarrasContainer>
+                <S.Input
+                  style={{ flex: 1, marginBottom: 0 }}
                   placeholder="Código de Barras"
                   value={novoProduto.codigo_barras}
-                  onChangeText={(text) =>
+                  onChangeText={(text: string) =>
                     setNovoProduto({ ...novoProduto, codigo_barras: text })
                   }
                   keyboardType="numeric"
                   placeholderTextColor="#999"
                 />
-                <TouchableOpacity
-                  style={styles.botaoBuscarCodigo}
-                  onPress={buscarCodigoBarras}
-                >
+                <S.BotaoBuscarCodigo onPress={buscarCodigoBarras}>
                   <Ionicons name="search" size={20} color="#fff" />
-                </TouchableOpacity>
-              </View>
+                </S.BotaoBuscarCodigo>
+              </S.CodigoBarrasContainer>
 
               {/* Categoria */}
-              <View style={styles.pickerContainer}>
-                <Text style={styles.pickerLabel}>Categoria:</Text>
+              <S.PickerContainer>
+                <S.PickerLabel>Categoria:</S.PickerLabel>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   {categorias.map((cat) => (
-                    <TouchableOpacity
+                    <S.PickerItem
                       key={cat.codigo}
-                      style={[
-                        styles.pickerItem,
-                        novoProduto.categoria_id === cat.codigo && styles.pickerItemSelected,
-                      ]}
+                      selected={novoProduto.categoria_id === cat.codigo}
                       onPress={() =>
                         setNovoProduto({ ...novoProduto, categoria_id: cat.codigo })
                       }
                     >
-                      <Text
-                        style={[
-                          styles.pickerItemText,
-                          novoProduto.categoria_id === cat.codigo &&
-                            styles.pickerItemTextSelected,
-                        ]}
-                      >
+                      <S.PickerItemText selected={novoProduto.categoria_id === cat.codigo}>
                         {cat.nome}
-                      </Text>
-                    </TouchableOpacity>
+                      </S.PickerItemText>
+                    </S.PickerItem>
                   ))}
                 </ScrollView>
-              </View>
+              </S.PickerContainer>
 
               {/* Fornecedor */}
-              <View style={styles.pickerContainer}>
-                <Text style={styles.pickerLabel}>Fornecedor:</Text>
+              <S.PickerContainer>
+                <S.PickerLabel>Fornecedor:</S.PickerLabel>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   {fornecedores.map((forn) => (
-                    <TouchableOpacity
+                    <S.PickerItem
                       key={forn.codigo}
-                      style={[
-                        styles.pickerItem,
-                        novoProduto.fornecedor_id === forn.codigo && styles.pickerItemSelected,
-                      ]}
+                      selected={novoProduto.fornecedor_id === forn.codigo}
                       onPress={() =>
                         setNovoProduto({ ...novoProduto, fornecedor_id: forn.codigo })
                       }
                     >
-                      <Text
-                        style={[
-                          styles.pickerItemText,
-                          novoProduto.fornecedor_id === forn.codigo &&
-                            styles.pickerItemTextSelected,
-                        ]}
-                      >
+                      <S.PickerItemText selected={novoProduto.fornecedor_id === forn.codigo}>
                         {forn.nome}
-                      </Text>
-                    </TouchableOpacity>
+                      </S.PickerItemText>
+                    </S.PickerItem>
                   ))}
                 </ScrollView>
-              </View>
+              </S.PickerContainer>
 
-              <View style={styles.row}>
-                <TextInput
-                  style={[styles.input, { flex: 1 }]}
+              <S.Row>
+                <S.Input
+                  style={{ flex: 1 }}
                   placeholder="Preço Custo"
                   value={novoProduto.preco_custo}
-                  onChangeText={(text) =>
+                  onChangeText={(text: string) =>
                     setNovoProduto({ ...novoProduto, preco_custo: text })
                   }
                   keyboardType="decimal-pad"
                   placeholderTextColor="#999"
                 />
-                <TextInput
-                  style={[styles.input, { flex: 1 }]}
+                <S.Input
+                  style={{ flex: 1 }}
                   placeholder="Preço Venda"
                   value={novoProduto.preco_venda}
-                  onChangeText={(text) =>
+                  onChangeText={(text: string) =>
                     setNovoProduto({ ...novoProduto, preco_venda: text })
                   }
                   keyboardType="decimal-pad"
                   placeholderTextColor="#999"
                 />
-              </View>
+              </S.Row>
 
-              <TextInput
-                style={styles.input}
+              <S.Input
                 placeholder="Estoque Mínimo"
                 value={novoProduto.estoque_minimo}
-                onChangeText={(text) =>
+                onChangeText={(text: string) =>
                   setNovoProduto({ ...novoProduto, estoque_minimo: text })
                 }
                 keyboardType="numeric"
                 placeholderTextColor="#999"
               />
-            </ScrollView>
+            </S.ModalForm>
 
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
+            <S.ModalButtons>
+              <S.CancelButton
                 onPress={() => {
                   setModalVisible(false);
                   setNovoProduto({
@@ -597,329 +547,18 @@ export default function ProductsScreen() {
                   setProdutoEditando(null);
                 }}
               >
-                <Text style={styles.cancelButtonText}>Cancelar</Text>
-              </TouchableOpacity>
+                <S.CancelButtonText>Cancelar</S.CancelButtonText>
+              </S.CancelButton>
 
-              <TouchableOpacity
-                style={[styles.modalButton, styles.saveButton]}
-                onPress={salvarProduto}
-              >
-                <Text style={styles.saveButtonText}>Salvar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+              <S.SaveButton onPress={salvarProduto}>
+                <S.SaveButtonText>Salvar</S.SaveButtonText>
+              </S.SaveButton>
+            </S.ModalButtons>
+          </S.ModalContent>
+        </S.ModalOverlay>
       </Modal>
-    </View>
+    </S.Container>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  botaoAdicionar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#4CAF50',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 5,
-  },
-  botaoAdicionarTexto: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 16,
-    color: '#666',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  emptyText: {
-    fontSize: 18,
-    color: '#666',
-    marginTop: 16,
-  },
-  lista: {
-    flex: 1,
-    padding: 10,
-  },
-  card: {
-    backgroundColor: '#fff',
-    padding: 12,
-    marginBottom: 10,
-    borderRadius: 10,
-    elevation: 2,
-  },
-  cardInativo: {
-    opacity: 0.6,
-  },
-  cardContent: {
-    flexDirection: 'row',
-    marginBottom: 10,
-  },
-  produtoFoto: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    marginRight: 12,
-  },
-  produtoSemFoto: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  produtoInfo: {
-    flex: 1,
-  },
-  produtoNome: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  produtoDescricao: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4,
-  },
-  produtoCategoria: {
-    fontSize: 11,
-    color: '#2196F3',
-  },
-  produtoFornecedor: {
-    fontSize: 11,
-    color: '#9C27B0',
-  },
-  precosContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 4,
-  },
-  preco: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#4CAF50',
-  },
-  codigoBarras: {
-    fontSize: 10,
-    color: '#999',
-  },
-  textoInativo: {
-    color: '#999',
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
-    alignSelf: 'flex-start',
-  },
-  statusText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-  botoesContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  botaoEditar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#2196F3',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-    gap: 4,
-  },
-  botaoDeletar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F44336',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-    gap: 4,
-  },
-  botaoTexto: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  // Modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 20,
-    width: '95%',
-    maxHeight: '90%',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 15,
-  },
-  modalForm: {
-    maxHeight: 500,
-  },
-  fotoContainer: {
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  fotoPreview: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  semFoto: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  fotoBotoes: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  botaoFoto: {
-    backgroundColor: '#2196F3',
-    padding: 8,
-    borderRadius: 8,
-  },
-  botaoGaleria: {
-    backgroundColor: '#9C27B0',
-    padding: 8,
-    borderRadius: 8,
-  },
-  input: {
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 10,
-    fontSize: 14,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  inputMultiline: {
-    height: 60,
-    textAlignVertical: 'top',
-  },
-  codigoBarrasContainer: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 12,
-  },
-  botaoBuscarCodigo: {
-    backgroundColor: '#FF9800',
-    padding: 12,
-    borderRadius: 10,
-    justifyContent: 'center',
-  },
-  pickerContainer: {
-    marginBottom: 12,
-  },
-  pickerLabel: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#666',
-    marginBottom: 8,
-  },
-  pickerItem: {
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 16,
-    marginRight: 8,
-  },
-  pickerItemSelected: {
-    backgroundColor: '#4CAF50',
-  },
-  pickerItemText: {
-    fontSize: 12,
-    color: '#666',
-  },
-  pickerItemTextSelected: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 15,
-  },
-  modalButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 25,
-    flex: 1,
-    marginHorizontal: 5,
-  },
-  cancelButton: {
-    backgroundColor: '#f5f5f5',
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  saveButton: {
-    backgroundColor: '#4CAF50',
-  },
-  cancelButtonText: {
-    color: '#666',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-});
+// Estilos movidos para products.styles.tsx usando styled-components

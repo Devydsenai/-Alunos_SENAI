@@ -8,7 +8,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { Link, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert } from 'react-native';
+import * as S from './index.styles';
 
 /**
  * Interface representando um cliente/fornecedor no sistema
@@ -248,15 +249,14 @@ export default function HomeScreen() {
 
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Sistema de Fornecedores </Text>
-        <Text style={styles.subtitle}>Criar Novo Fornecedor</Text>
+    <S.Container>
+      <S.Content>
+        <S.Title>Sistema de Fornecedores </S.Title>
+        <S.Subtitle>Criar Novo Fornecedor</S.Subtitle>
         
         {/* Campo de Pesquisa */}
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
+        <S.SearchContainer>
+          <S.SearchInput
             placeholder="Pesquisar fornecedores..."
             value={pesquisa}
             onChangeText={filtrarClientes}
@@ -274,390 +274,120 @@ export default function HomeScreen() {
           
           {/* Dropdown de Sugestões */}
           {mostrarSugestoes && clientesFiltrados.length > 0 && (
-            <View style={styles.sugestoesContainer}>
+            <S.SugestoesContainer>
               {clientesFiltrados.slice(0, 5).map((cliente) => (
-                <TouchableOpacity
+                <S.SugestaoItem
                   key={cliente.codigo}
-                  style={styles.sugestaoItem}
                   onPress={() => selecionarCliente(cliente)}
                 >
-                  <View style={styles.sugestaoInfo}>
-                    <Text style={[styles.sugestaoNome, !cliente.ativo && styles.textoInativo]}>
+                  <S.SugestaoInfo>
+                    <S.SugestaoNome inativo={!cliente.ativo}>
                       {cliente.nome}
-                    </Text>
-                    <Text style={[styles.sugestaoEmail, !cliente.ativo && styles.textoInativo]}>
+                    </S.SugestaoNome>
+                    <S.SugestaoEmail inativo={!cliente.ativo}>
                       {cliente.email}
-                    </Text>
-                  </View>
-                  <View style={[styles.sugestaoStatus, { backgroundColor: cliente.ativo ? '#4CAF50' : '#F44336' }]}>
-                    <Text style={styles.sugestaoStatusText}>
+                    </S.SugestaoEmail>
+                  </S.SugestaoInfo>
+                  <S.SugestaoStatus ativo={cliente.ativo}>
+                    <S.SugestaoStatusText>
                       {cliente.ativo ? 'Ativo' : 'Inativo'}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
+                    </S.SugestaoStatusText>
+                  </S.SugestaoStatus>
+                </S.SugestaoItem>
               ))}
-            </View>
+            </S.SugestoesContainer>
           )}
-        </View>
+        </S.SearchContainer>
 
         {/* Formulário de Criação */}
-        <View style={styles.formContainer}>
-          <Text style={styles.formTitle}>Dados do Fornecedor</Text>
+        <S.FormContainer>
+          <S.FormTitle>Dados do Fornecedor</S.FormTitle>
           
           {/* Seção de Foto */}
-          <View style={styles.fotoContainer}>
+          <S.FotoContainer>
             {novoCliente.foto ? (
-              <View style={styles.fotoPreviewContainer}>
-                <Image source={{ uri: novoCliente.foto }} style={styles.fotoPreview} />
-                <TouchableOpacity 
-                  style={styles.botaoRemoverFoto}
-                  onPress={removerFoto}
-                >
+              <S.FotoPreviewContainer>
+                <S.FotoPreview source={{ uri: novoCliente.foto }} />
+                <S.BotaoRemoverFoto onPress={removerFoto}>
                   <Ionicons name="close-circle" size={30} color="#F44336" />
-                </TouchableOpacity>
-              </View>
+                </S.BotaoRemoverFoto>
+              </S.FotoPreviewContainer>
             ) : (
-              <View style={styles.semFoto}>
+              <S.SemFoto>
                 <Ionicons name="person-circle-outline" size={80} color="#ccc" />
-                <Text style={styles.semFotoTexto}>Sem foto</Text>
-              </View>
+                <S.SemFotoTexto>Sem foto</S.SemFotoTexto>
+              </S.SemFoto>
             )}
             
-            <View style={styles.botoesContainer}>
-              <TouchableOpacity 
-                style={styles.botaoFoto}
-                onPress={tirarFoto}
-              >
+            <S.BotoesContainer>
+              <S.BotaoFoto onPress={tirarFoto}>
                 <Ionicons name="camera" size={20} color="#fff" />
-                <Text style={styles.botaoFotoTexto}>Tirar Foto</Text>
-              </TouchableOpacity>
+                <S.BotaoFotoTexto>Tirar Foto</S.BotaoFotoTexto>
+              </S.BotaoFoto>
               
-              <TouchableOpacity 
-                style={styles.botaoGaleria}
-                onPress={selecionarImagem}
-              >
+              <S.BotaoGaleria onPress={selecionarImagem}>
                 <Ionicons name="images" size={20} color="#fff" />
-                <Text style={styles.botaoFotoTexto}>Galeria</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+                <S.BotaoFotoTexto>Galeria</S.BotaoFotoTexto>
+              </S.BotaoGaleria>
+            </S.BotoesContainer>
+          </S.FotoContainer>
           
-          <TextInput
-            style={styles.input}
+          <S.Input
             placeholder="Nome do Fornecedor *"
             value={novoCliente.nome}
-            onChangeText={(text) => setNovoCliente({...novoCliente, nome: text})}
+            onChangeText={(text: string) => setNovoCliente({...novoCliente, nome: text})}
             placeholderTextColor="#999"
           />
           
-          <TextInput
-            style={styles.input}
+          <S.Input
             placeholder="E-mail do Fornecedor *"
             value={novoCliente.email}
-            onChangeText={(text) => setNovoCliente({...novoCliente, email: text})}
+            onChangeText={(text: string) => setNovoCliente({...novoCliente, email: text})}
             keyboardType="email-address"
             autoCapitalize="none"
             placeholderTextColor="#999"
           />
           
-          <TextInput
-            style={styles.input}
+          <S.Input
             placeholder="Telefone do Fornecedor"
             value={novoCliente.telefone}
-            onChangeText={(text) => setNovoCliente({...novoCliente, telefone: text})}
+            onChangeText={(text: string) => setNovoCliente({...novoCliente, telefone: text})}
             keyboardType="phone-pad"
             placeholderTextColor="#999"
           />
           
-          <View style={styles.checkboxContainer}>
-            <TouchableOpacity
-              style={[styles.checkbox, novoCliente.ativo && styles.checkboxChecked]}
+          <S.CheckboxContainer>
+            <S.Checkbox
+              checked={novoCliente.ativo}
               onPress={() => setNovoCliente({...novoCliente, ativo: !novoCliente.ativo})}
             >
-              <Text style={styles.checkboxText}>✓</Text>
-            </TouchableOpacity>
-            <Text style={styles.checkboxLabel}>Fornecedor ativo</Text>
-          </View>
+              <S.CheckboxText>✓</S.CheckboxText>
+            </S.Checkbox>
+            <S.CheckboxLabel>Fornecedor ativo</S.CheckboxLabel>
+          </S.CheckboxContainer>
           
-          <TouchableOpacity
-            style={[styles.createButton, loading && styles.buttonDisabled]}
-            onPress={adicionarCliente}
+          <S.CreateButton
             disabled={loading}
+            onPress={adicionarCliente}
           >
-            <Text style={styles.createButtonText}>
+            <S.CreateButtonText>
               {loading ? 'Criando...' : 'Criar Fornecedor'}
-            </Text>
-          </TouchableOpacity>
-        </View>
+            </S.CreateButtonText>
+          </S.CreateButton>
+        </S.FormContainer>
 
 
         {/* Link para ver fornecedores */}
-        <View style={styles.linkContainer}>
-          <Link href="/(tabs)/about" style={styles.linkButton}>
-            <Text style={styles.linkText}>Ver Lista Completa de Fornecedores</Text>
+        <S.LinkContainer>
+          <Link href="/(tabs)/about" asChild>
+            <S.LinkButton>
+              <S.LinkText>Ver Lista Completa de Fornecedores</S.LinkText>
+            </S.LinkButton>
           </Link>
-        </View>
-      </View>
-    </ScrollView>
+        </S.LinkContainer>
+      </S.Content>
+    </S.Container>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  content: {
-    padding: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 18,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 30,
-  },
-  searchContainer: {
-    marginBottom: 20,
-    position: 'relative',
-    zIndex: 1000,
-  },
-  searchInput: {
-    backgroundColor: '#fff',
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 25,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  // Estilos para o dropdown de sugestões
-  sugestoesContainer: {
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    right: 0,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    marginTop: 5,
-    maxHeight: 200,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    zIndex: 1001,
-  },
-  sugestaoItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  sugestaoInfo: {
-    flex: 1,
-    marginRight: 10,
-  },
-  sugestaoNome: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 2,
-  },
-  sugestaoEmail: {
-    fontSize: 12,
-    color: '#666',
-  },
-  sugestaoStatus: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 8,
-  },
-  sugestaoStatusText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-  formContainer: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 15,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  formTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  input: {
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 10,
-    fontSize: 16,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderWidth: 2,
-    borderColor: '#ddd',
-    borderRadius: 4,
-    marginRight: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxChecked: {
-    backgroundColor: '#4CAF50',
-    borderColor: '#4CAF50',
-  },
-  checkboxText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  checkboxLabel: {
-    fontSize: 16,
-    color: '#333',
-  },
-  createButton: {
-    backgroundColor: '#4CAF50',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderRadius: 25,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  buttonDisabled: {
-    backgroundColor: '#ccc',
-  },
-  createButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  linkContainer: {
-    alignItems: 'center',
-  },
-  linkButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 30,
-    paddingVertical: 12,
-    borderRadius: 25,
-  },
-  linkText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  textoInativo: {
-    color: '#999',
-  },
-  // Estilos para foto
-  fotoContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-    paddingVertical: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  fotoPreviewContainer: {
-    position: 'relative',
-    marginBottom: 15,
-  },
-  fotoPreview: {
-    width: 90,
-    height: 120,
-    borderRadius: 10,
-    borderWidth: 3,
-    borderColor: '#4CAF50',
-  },
-  botaoRemoverFoto: {
-    position: 'absolute',
-    top: -5,
-    right: -5,
-    backgroundColor: '#fff',
-    borderRadius: 15,
-  },
-  semFoto: {
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  semFotoTexto: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 5,
-  },
-  botoesContainer: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  botaoFoto: {
-    backgroundColor: '#2196F3',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    gap: 8,
-  },
-  botaoGaleria: {
-    backgroundColor: '#9C27B0',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    gap: 8,
-  },
-  botaoFotoTexto: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-});
+// Estilos movidos para index.styles.tsx usando styled-components
